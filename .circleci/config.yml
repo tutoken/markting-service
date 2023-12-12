@@ -1,0 +1,48 @@
+version: 2
+
+environment:
+  JAVA_HOME: /usr/lib/jvm/java-11/bin/java
+  PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  REDIS_HOST: redis-master
+  REDIS_PORT: 6379
+  POSTGRES_HOST: postgres-master
+  POSTGRES_PORT: 5432
+  POSTGRES_USER: myuser
+  POSTGRES_PASSWORD: mypassword
+  POSTGRES_DB: mydatabase
+
+docker:
+  CircleCiSpringBoot:
+    image: circleci/springboot:2.5.4-jdk-11-postgres-redis
+    environment:
+      - JAVA_HOME=/usr/lib/jvm/java-11/bin/java
+      - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    volumes:
+      - /tmp/circleci/redis:/data/redis
+      - /tmp/circleci/postgres:/data/postgres
+
+# 定义步骤
+steps:
+  - checkout
+  - run:
+      name: Show active SSH keys
+      command: |
+        ls -l ~/.ssh/id*
+  - run:
+      name: Install依赖
+      command: |
+        echo "===> Installing dependencies..."  
+        mvn clean install -U
+  - run:
+      name: Start Redis
+      command: |
+        redis-cli ping
+  - run:
+      name: Start PostgreSQL
+      command: |
+        psql -U myuser -d mydatabase -h postgres-master -p 5432 -c "SELECT 1;"
+  - run:
+      name: Run Integration Tests
+      command: |
+        echo "===> Running integration tests..."  
+        mvn integration-test -pl integration-tests
