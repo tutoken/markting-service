@@ -96,7 +96,10 @@ public class AWSServiceImpl implements AWSService {
             PresignedGetObjectRequest presignedGetObjectRequest = preSigner.presignGetObject(getObjectPresignRequest);
 
             return presignedGetObjectRequest.url().toString();
+        } catch (Exception exception) {
+            log.error("Generate download url failed. ", exception);
         }
+        return null;
     }
 }
 
