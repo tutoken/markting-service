@@ -109,7 +109,7 @@ public class MarketSiteController {
 
     @GetMapping("/test")
     public void test() {
-//        dailyReportService.createDailyReport();
+        dailyReportService.createDailyReport();
     }
 
     @ApiOperation(value = "real-time reserve", httpMethod = "GET", notes = "get real-time reserve")

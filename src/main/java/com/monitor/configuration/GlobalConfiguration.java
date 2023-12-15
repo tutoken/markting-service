@@ -15,7 +15,8 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scripting.support.ResourceScriptSource;
-import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -26,9 +27,15 @@ public class GlobalConfiguration {
     @Value("${aws.credential}")
     private String credential;
 
+    @Value("${aws.accessKeyId}")
+    private String accessKeyId;
+
+    @Value("${aws.secretAccessKey}")
+    private String secretAccessKey;
+
     @Bean
-    ProfileCredentialsProvider profileCredentialsProvider() {
-        return ProfileCredentialsProvider.builder().profileName(credential).build();
+    StaticCredentialsProvider staticCredentialsProvider() {
+        return StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccessKey));
     }
 
     @Bean("asyncExecutor")

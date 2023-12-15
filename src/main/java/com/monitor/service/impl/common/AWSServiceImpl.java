@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
-import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -24,8 +26,11 @@ import java.time.Duration;
 @Slf4j
 public class AWSServiceImpl implements AWSService {
 
+//    @Autowired
+//    private ProfileCredentialsProvider profileCredentialsProvider;
+
     @Autowired
-    private ProfileCredentialsProvider profileCredentialsProvider;
+    private StaticCredentialsProvider staticCredentialsProvider;
 
     @Value("${aws.region}")
     private String region;
@@ -36,7 +41,7 @@ public class AWSServiceImpl implements AWSService {
     public void uploadFile(String file, String bucket, String objectKey) {
         try (S3Client s3Client = S3Client.builder()
                 .region(Region.of(region))
-                .credentialsProvider(profileCredentialsProvider)
+                .credentialsProvider(staticCredentialsProvider)
                 .build()) {
             String md5Pass = DigestUtils.md5DigestAsHex(objectKey.getBytes());
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
@@ -54,7 +59,7 @@ public class AWSServiceImpl implements AWSService {
         PutObjectResponse response;
         try (S3Client s3Client = S3Client.builder()
                 .region(Region.of(region))
-                .credentialsProvider(profileCredentialsProvider)
+                .credentialsProvider(staticCredentialsProvider)
                 .build()) {
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucketName)
@@ -83,7 +88,7 @@ public class AWSServiceImpl implements AWSService {
     public String generateDownloadUrl(String bucketName, String objectKey) {
         try (S3Presigner preSigner = S3Presigner.builder()
                 .region(Region.of(region))
-                .credentialsProvider(profileCredentialsProvider)
+                .credentialsProvider(staticCredentialsProvider)
                 .build()) {
             GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                     .bucket(bucketName)
