@@ -73,7 +73,10 @@ public class AWSServiceImpl implements AWSService {
             }
 
             return objectKey.equals(response.eTag().replaceAll("\"", ""));
+        } catch (Exception exception) {
+            log.error("Upload file failed. ", exception);
         }
+        return false;
     }
 
     @Override

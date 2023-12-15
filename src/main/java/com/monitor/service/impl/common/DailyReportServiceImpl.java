@@ -164,8 +164,8 @@ public class DailyReportServiceImpl implements DailyReportService {
                 outputStream.write(downloadContents);
             } catch (Exception ex) {
                 log.error("Store file failed.", ex);
-                slackService.sendNotice("test", "Download daily report succeeded but upload failed.");
             }
+            slackService.sendNotice("test", "Download daily report succeeded but upload failed.");
         }
         return md5Pass;
     }
