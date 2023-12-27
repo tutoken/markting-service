@@ -48,7 +48,7 @@ public class AvaxChainService extends DefaultChainService {
             if (object == null) {
                 return lastCount;
             }
-            if (object.getJSONObject("error") != null && ("-32701".equals(object.getJSONObject("error").getString("code")) || "-32600".equals(object.getJSONObject("error").getString("code")))) {
+            if (object.getJSONObject("error") != null && ("-32701".equals(object.getJSONObject("error").getString("code")))) {
                 offset /= 2;
                 continue;
             } else {
