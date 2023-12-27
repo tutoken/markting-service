@@ -167,4 +167,19 @@ public interface ChainJsonRpcService extends BlockchainService {
 
         return result;
     }
+
+    default String getLatestBlockNumber() {
+        JSONObject payload = new JSONObject()
+                .fluentPut("jsonrpc", "2.0")
+                .fluentPut("method", "eth_blockNumber")
+                .fluentPut("id", "1");
+
+        JSONArray params = new JSONArray();
+        payload.put("params", params);
+
+        String response = HttpUtil.post(getJsonRpcURL(), payload.toString());
+        JSONObject object = JSONObject.parseObject(response);
+
+        return object == null ? null : object.getString("result");
+    }
 }
