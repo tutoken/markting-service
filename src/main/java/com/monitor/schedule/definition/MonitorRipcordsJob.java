@@ -10,7 +10,7 @@ public class MonitorRipcordsJob extends ScheduleJobDefinition {
 
     @Override
     public void run() {
-        String status = marketSiteService.ripcords();
+        String status = dailyReportService.ripcords();
         if (status != null && !"".equals(status)) {
             slackService.sendNotice("tusd", String.format("```%s```", String.format("Current ripcords status is %s", status)));
             if ("Balances".equals(status)) {

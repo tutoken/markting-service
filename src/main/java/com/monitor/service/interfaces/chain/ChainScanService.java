@@ -128,6 +128,6 @@ public interface ChainScanService extends BlockchainService {
                 optionalParam("apikey", getApiKey());
 
         JSONObject response = JSON.parseObject(HttpUtil.get(url));
-        return response == null ? null : response.getJSONArray("result");
+        return response.getJSONArray("result");
     }
 }

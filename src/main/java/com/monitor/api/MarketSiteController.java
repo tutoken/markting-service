@@ -1,6 +1,7 @@
 package com.monitor.api;
 
 import com.monitor.schedule.ScheduleTaskController;
+import com.monitor.service.interfaces.DailyReportService;
 import com.monitor.service.interfaces.EMailService;
 import com.monitor.service.interfaces.MarketSiteService;
 import com.monitor.service.interfaces.Web3Service;
@@ -29,6 +30,9 @@ public class MarketSiteController {
 
     @Autowired
     private MarketSiteService marketSiteService;
+
+    @Autowired
+    private DailyReportService dailyReportService;
 
     @Autowired
     private EMailService eMailService;
@@ -103,6 +107,14 @@ public class MarketSiteController {
         return eMailService.upload(file);
     }
 
+    @GetMapping("/test")
+    public void test() {
+        dailyReportService.createDailyReport();
+    }
 
-
+    @ApiOperation(value = "real-time reserve", httpMethod = "GET", notes = "get real-time reserve")
+    @GetMapping("/reserves")
+    public Map<String, Object> reserve() {
+        return dailyReportService.getDailyReport();
+    }
 }

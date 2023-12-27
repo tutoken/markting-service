@@ -141,11 +141,9 @@ public class HttpUtil {
     }
 
     public static byte[] download(String url, int maxRetry) {
-        byte[] downloadContents = new byte[0];
         do {
             try {
-                downloadContents = download(url);
-                break;
+                return download(url);
             } catch (Exception e) {
                 maxRetry = maxRetry - 1;
                 if (maxRetry >= 0) {
@@ -159,8 +157,8 @@ public class HttpUtil {
             }
         } while (maxRetry >= 0);
 
-        log.error("Download url " + url + "failed");
-        return downloadContents;
+        log.error("Download url " + url + " failed");
+        return new byte[0];
     }
 
     private static byte[] download(String urlString) throws IOException {

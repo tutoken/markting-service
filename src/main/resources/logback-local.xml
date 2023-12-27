@@ -13,19 +13,19 @@
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- <fileNamePattern>${catalina.base}/logs/carmall-manager.%d{yyyy-MM-dd}.log</fileNamePattern> -->
 
-            <fileNamePattern>./app/logs/blockchain.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>./app/logs/market.%d{yyyy-MM-dd}.log</fileNamePattern>
         </rollingPolicy>
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    
+
 
     <root level="info">
         <appender-ref ref="console" />
         <appender-ref ref="rollingFile" />
     </root>
 
-<jmxConfigurator/>
+    <jmxConfigurator/>
 </configuration>

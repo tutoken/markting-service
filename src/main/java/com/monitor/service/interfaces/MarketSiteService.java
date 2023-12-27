@@ -35,13 +35,6 @@ public interface MarketSiteService {
      */
     @Deprecated
     void uploadFile(MultipartFile file);
-
-    /**
-     * Get the current alert
-     *
-     * @return
-     */
-    String ripcords();
 }
 
 
