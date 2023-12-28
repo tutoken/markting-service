@@ -58,11 +58,10 @@ public class AvaxChainService extends DefaultChainService {
             if (!CollectionUtils.isEmpty(transactions)) {
                 lastCount += transactions.size();
             }
+            redisUtil.saveStringValue(lastCountKey, String.valueOf(lastCount), 0, null);
+            redisUtil.saveStringValue(lastBlockKey, toBlock.toString(), 0, null);
             startBlock = toBlock.add(BigInteger.ONE);
         }
-
-        redisUtil.saveStringValue(lastCountKey, String.valueOf(lastCount), 0, null);
-        redisUtil.saveStringValue(lastBlockKey, endBlock.add(BigInteger.ONE).toString(), 0, null);
 
         return lastCount;
     }
