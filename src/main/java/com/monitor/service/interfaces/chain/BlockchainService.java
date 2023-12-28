@@ -118,4 +118,6 @@ public interface BlockchainService {
      * Get total transactions count
      */
     int getTransactionCount();
+
+    String getLatestBlockNumber();
 }
