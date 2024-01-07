@@ -1,15 +1,16 @@
 package com.monitor.api;
 
+import com.monitor.schedule.ScheduleTaskController;
 import com.monitor.service.ServiceContext;
+import com.monitor.service.interfaces.TokenService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -21,10 +22,16 @@ import static java.lang.Class.forName;
 @EnableSwagger2
 @Api(value = "Monitor")
 @Slf4j
-public class ContractController {
+public class MonitorController {
 
     @Autowired
     private ServiceContext serviceContext;
+
+    @Autowired
+    private TokenService tokenService;
+
+    @Autowired
+    private ScheduleTaskController scheduleTaskController;
 
     @ApiOperation(value = "queryContract", httpMethod = "GET", notes = "Read the value of the corresponding field from the contract", response = Map.class)
     @RequestMapping("/contract")
@@ -65,4 +72,21 @@ public class ContractController {
         return serviceContext.tusdServiceOf(chain).funcContract(chain, field, map);
     }
 
+    @ApiOperation(value = "totalSupply", httpMethod = "GET", notes = "Query the total supply at a given time")
+    @RequestMapping("/totalSupplyByTimestamp")
+    public Map<String, BigDecimal> totalSupply(@RequestParam(name = "chain", required = false) String chain, @RequestParam(name = "time", required = false) String time) {
+        return tokenService.queryTotalSupplyByTimestamp(chain, time);
+    }
+
+    @ApiOperation(value = "getCurrentPrice", httpMethod = "GET", notes = "Query current price of a given token.")
+    @RequestMapping("/price")
+    public String price(@RequestParam(name = "symbol") String symbol, @RequestParam(name = "convert") String convert) {
+        return tokenService.currentPrice(symbol, convert);
+    }
+
+    @ApiOperation(value = "totalSupply", httpMethod = "GET", notes = "Query the total supply at a given time")
+    @RequestMapping("/test")
+    public void test() {
+        scheduleTaskController.task1();
+    }
 }

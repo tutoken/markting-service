@@ -28,7 +28,7 @@ public class MonitorBalanceJob extends ScheduleJobDefinition {
                 continue;
             }
             for (String address : addresses) {
-                BigDecimal balance = web3Service.getBalance(chain, address);
+                BigDecimal balance = tokenService.getBalance(chain, address);
                 if (balance.compareTo(new BigDecimal(monitor.getBalanceThreshold(chain))) < 0) {
                     Map<String, String> message = new HashMap<>();
                     message.put("Balance", balance.divide(DECIMAL18, 18, RoundingMode.HALF_UP).toString());

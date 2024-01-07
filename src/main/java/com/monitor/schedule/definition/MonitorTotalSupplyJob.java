@@ -13,21 +13,17 @@ public class MonitorTotalSupplyJob extends ScheduleJobDefinition {
 
     @Override
     protected void run() {
-        this.start();
-
         log.info("monitor totalSupply");
 
         slackService.init();
 
-        Map<String, BigDecimal> supplies = web3Service.queryTotalSupply();
+        Map<String, BigDecimal> supplies = tokenService.queryTotalSupplyWithSummary();
 
         slackService.addTotalSupply(supplies.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().toString())));
         for (Map.Entry<String, BigDecimal> entry : supplies.entrySet()) {
             slackService.addMessage(entry.getKey(), Map.of("totalSupply", entry.getValue().toString()));
         }
         slackService.sendAsTable("tusd");
-
-        this.end();
     }
 
 

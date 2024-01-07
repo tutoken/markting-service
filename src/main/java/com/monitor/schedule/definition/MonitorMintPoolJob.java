@@ -18,8 +18,6 @@ import static com.monitor.utils.CommonUtil.FORMAT;
 public class MonitorMintPoolJob extends ScheduleJobDefinition {
     @Override
     public void run() {
-        this.start();
-
         slackService.init();
 
         for (String chain : monitor.getNativelyChains()) {
@@ -35,8 +33,6 @@ public class MonitorMintPoolJob extends ScheduleJobDefinition {
         }
 
         slackService.sendAsTable("tusd");
-
-        this.end();
     }
 
     private void queryPool(Map<String, String> map, TUSDService tusdService, String chain, String t1, String t2) {

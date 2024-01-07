@@ -1,7 +1,7 @@
 package com.monitor.service;
 
-import com.monitor.service.interfaces.chain.BlockchainService;
 import com.monitor.service.interfaces.TUSDService;
+import com.monitor.service.interfaces.chain.BlockchainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +19,7 @@ public class ServiceContext {
     private final Map<String, TUSDService> tusdServiceMap = new HashMap<>(2);
 
     public BlockchainService chainServiceOf(String chain) {
-        return web3ServiceMap.getOrDefault(String.format("%sChainService", chain), web3ServiceMap.get(DEFAULT + "ChainService")).init(chain);
+        return web3ServiceMap.getOrDefault(String.format("%sChainService", chain), web3ServiceMap.get(DEFAULT + "ChainService"));
     }
 
     public TUSDService tusdServiceOf(String chain) {

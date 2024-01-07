@@ -57,23 +57,28 @@ public class TimeUtil {
     public static String MONITOR(long stamp) {
         // within 1 s
         if (stamp < 1000) {
-            return stamp + " ms";
+//            return stamp + " ms";
+            return "";
         }
         // within 1 min
         else if (stamp < 60000) {
-            return stamp / 1000 + " seconds " + MONITOR(stamp % 1000);
+            long second = stamp / 1000;
+            return second + (second == 1L ? " second " : " seconds ") + MONITOR(stamp % 1000);
         }
         // within 1 hour
         else if (stamp < 3600000) {
-            return stamp / 60000 + " minutes " + MONITOR(stamp % 60000);
+            long minute = stamp / 60000;
+            return minute + (minute == 1L ? " minute " : " minutes ") + MONITOR(stamp % 60000);
         }
         // within 1 day
         else if (stamp < 86400000) {
-            return stamp / 3600000 + " hours " + MONITOR(stamp % 3600000);
+            long hour = stamp / 3600000;
+            return hour + (hour == 1L ? " hour " : " hours ") + MONITOR(stamp % 3600000);
         }
         // longer
         else {
-            return stamp / 86400000 + " days " + MONITOR(stamp % 86400000);
+            long day = stamp / 86400000;
+            return day + (day == 1L ? " day " : " days ") + MONITOR(stamp % 86400000);
         }
     }
 

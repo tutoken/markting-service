@@ -3,7 +3,9 @@ package com.monitor.utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
@@ -11,10 +13,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static com.monitor.utils.TimeUtil.calTimeElapse;
@@ -79,65 +79,8 @@ public class HttpUtil {
 
     private static String execute(HttpRequest request) throws IOException, InterruptedException {
         HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        log.debug("Response is " + response);
         return response.statusCode() == 200 ? response.body() : null;
-    }
-
-    public static String doGet(String url, Map<String, String> properties) {
-        try {
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            return execute(connection, "get", properties, null, 0, 0, true, true);
-        } catch (IOException e) {
-            log.error(String.format("Request %s failed, ", url), e);
-        }
-
-        return null;
-    }
-
-    public static String doPost(String url, Map<String, String> properties, String payload) {
-        try {
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            return execute(connection, "post", properties, payload, 0, 0, true, true);
-        } catch (IOException e) {
-            log.error(String.format("Request %s failed, ", url), e);
-        }
-
-        return null;
-    }
-
-    public static String execute(HttpURLConnection connection, String method, Map<String, String> properties, String payload, int connectTimeout, int readTimeout, boolean doOutput, boolean doInput) throws IOException {
-        connection.setConnectTimeout(connectTimeout <= 0 ? 15000 : connectTimeout);
-        connection.setReadTimeout(readTimeout <= 0 ? 60000 : readTimeout);
-
-        if (!CollectionUtils.isEmpty(properties)) {
-            for (Map.Entry<String, String> entry : properties.entrySet()) {
-                connection.setRequestProperty(entry.getKey(), entry.getValue());
-            }
-        }
-        if ("POST".equals(method)) {
-            connection.setDoOutput(doOutput);
-            connection.setDoInput(doInput);
-            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            try (OutputStream outputStream = connection.getOutputStream()) {
-                outputStream.write(payload.getBytes());
-            }
-        } else {
-            connection.connect();
-        }
-
-        if (connection.getResponseCode() == 200) {
-            try (InputStream inputStream = connection.getInputStream(); BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));) {
-                StringBuilder sbf = new StringBuilder();
-                String temp;
-                while ((temp = bufferedReader.readLine()) != null) {
-                    sbf.append(temp);
-                    sbf.append("\r\n");
-                }
-                return sbf.toString();
-            } finally {
-                Objects.requireNonNull(connection).disconnect();
-            }
-        }
-        return null;
     }
 
     public static byte[] download(String url, int maxRetry) {

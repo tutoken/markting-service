@@ -3,6 +3,7 @@ package com.monitor.schedule;
 import com.monitor.constants.Slack;
 import com.monitor.schedule.definition.ScheduleJobDefinition;
 import com.monitor.service.interfaces.SlackService;
+import com.monitor.utils.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
@@ -21,12 +23,7 @@ public class ScheduleTaskController {
 
     @Scheduled(cron = "0 0 * * *  ?")
     public void task1() {
-        scheduleTaskGroup.execute(List.of("UpdateTotalTransactionContJob"));
-    }
-
-    @Scheduled(cron = "0 30 8 * * ?")
-    public void task2() {
-        scheduleTaskGroup.execute(List.of("CreateDailyReportJob"));
+        scheduleTaskGroup.execute(List.of("MonitorLaunchPadJob"));
     }
 
     @Component
@@ -51,6 +48,9 @@ public class ScheduleTaskController {
         @Autowired
         private Slack slack;
 
+        @Autowired
+        private RedisUtil redisUtil;
+
         public void execute(List<String> jobs) {
 
             long lastTimeStamp = System.currentTimeMillis() - (1000 * 60 * 15);
@@ -61,14 +61,20 @@ public class ScheduleTaskController {
             for (String jobName : jobs) {
                 log.info(String.format("Start running %s", jobName));
 
+                if (redisUtil.getBooleanValue(jobName)) {
+                    log.error(jobName + " is running!");
+                }
                 try {
+                    redisUtil.saveBooleanValue(jobName, true, 10, TimeUnit.MINUTES);
                     scheduleJobContext.taskOf(jobName).launch(String.valueOf(lastTimeStamp), String.valueOf(currentTimeStamp));
                 } catch (Exception ex) {
-                    log.error(ex.getMessage(), ex);
+                    log.error("run schedule task failed.", ex);
 
-                    slackService.sendNotice("test", String.format("%s exception, lastTimeStamp: %d, currentTimeStamp: %d", jobName, lastTimeStamp, currentTimeStamp));
+                    slackService.sendNotice("test", String.format("%s exception, lastTimeStamp: %d, currentTimeStamp: %d, cause: %s", jobName, lastTimeStamp, currentTimeStamp, ex));
                     slackService.sendNotice("test", ex.getMessage());
                     slackService.sendNotice("test", String.format("%s%s", Slack.WARNING, slack.getID("Hosea")));
+                } finally {
+                    redisUtil.deleteBooleanKey(jobName);
                 }
 
                 log.info(jobName + " end");

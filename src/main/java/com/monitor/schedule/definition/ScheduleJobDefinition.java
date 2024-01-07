@@ -5,27 +5,19 @@ import com.monitor.constants.Slack;
 import com.monitor.constants.Token.TUSD;
 import com.monitor.constants.Web3Provider;
 import com.monitor.service.ServiceContext;
-import com.monitor.service.interfaces.DailyReportService;
-import com.monitor.service.interfaces.MarketSiteService;
 import com.monitor.service.interfaces.SlackService;
-import com.monitor.service.interfaces.Web3Service;
+import com.monitor.service.interfaces.TokenService;
 import com.monitor.utils.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.concurrent.TimeUnit;
+
 @Slf4j
 public abstract class ScheduleJobDefinition {
 
-    public volatile boolean running;
-
     @Autowired
-    protected MarketSiteService marketSiteService;
-
-    @Autowired
-    protected DailyReportService dailyReportService;
-
-    @Autowired
-    protected Web3Service web3Service;
+    protected TokenService tokenService;
 
     @Autowired
     protected ServiceContext serviceContext;
@@ -58,16 +50,5 @@ public abstract class ScheduleJobDefinition {
         this.lastTimeStamp = lastTimeStamp;
         this.currentTimeStamp = currentTimeStamp;
         this.run();
-    }
-
-    public void start() {
-        if (this.running) {
-            throw new RuntimeException("CurrentJosIsRunning!");
-        }
-        this.running = true;
-    }
-
-    public void end() {
-        this.running = false;
     }
 }

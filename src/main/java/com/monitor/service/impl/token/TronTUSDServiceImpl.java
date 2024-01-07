@@ -1,10 +1,11 @@
-package com.monitor.service.impl.contract;
+package com.monitor.service.impl.token;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.monitor.service.interfaces.TUSDService;
 import com.monitor.utils.HttpUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -14,10 +15,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service("tronTUSDService")
+@Slf4j
 public class TronTUSDServiceImpl extends TUSDService {
     private static final Map<String, String> proxyOwners = new HashMap<>();
-
-    protected Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
     public String queryContract(String chain, String field) {
@@ -40,7 +40,7 @@ public class TronTUSDServiceImpl extends TUSDService {
             return proxyOwners.get(chain);
         }
         String proxyOwner = this.queryTron(token.getContract("tron"), "owner");
-        logger.info(String.format("proxyOwner: %s", proxyOwner));
+        log.info(String.format("proxyOwner: %s", proxyOwner));
         proxyOwner = "41" + proxyOwner.substring(proxyOwner.length() - 40);
         return proxyOwners.put(chain, proxyOwner);
     }

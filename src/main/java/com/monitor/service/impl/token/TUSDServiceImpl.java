@@ -1,10 +1,9 @@
-package com.monitor.service.impl.contract;
+package com.monitor.service.impl.token;
 
 import com.monitor.abi.TUSD;
 import com.monitor.abi.TUSDController;
 import com.monitor.service.interfaces.TUSDService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
@@ -24,15 +23,15 @@ import java.util.Map;
 import static com.monitor.constants.Monitor.DECIMAL18;
 
 @Service("defaultTUSDService")
+@Slf4j
 public class TUSDServiceImpl extends TUSDService {
-    protected Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
     public String queryContract(String chain, String field) {
         try {
             return this.fromContract(chain, field, token.getContract(chain), TUSD.class);
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             return "N/A";
         }
     }
@@ -47,7 +46,7 @@ public class TUSDServiceImpl extends TUSDService {
 
             return response.toString();
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             return "N/A";
         }
     }
@@ -57,7 +56,7 @@ public class TUSDServiceImpl extends TUSDService {
         try {
             return this.fromContract(chain, field, token.getController(chain), TUSDController.class);
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             return "N/A";
         }
     }
@@ -89,7 +88,7 @@ public class TUSDServiceImpl extends TUSDService {
                 try {
                     return client.ethGasPrice().send().getGasPrice();
                 } catch (Exception exception) {
-                    logger.warn(exception.getMessage(), exception);
+                    log.warn(exception.getMessage(), exception);
                     return BigInteger.ZERO;
                 }
             }

@@ -51,8 +51,8 @@ public class GlobalConfiguration {
     }
 
     @Bean
-    public RedisTemplate redisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate redisTemplate = new RedisTemplate<>();
+    public RedisTemplate<String, ?> redisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, ?> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(connectionFactory);
 
         Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(Object.class);

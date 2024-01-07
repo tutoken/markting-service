@@ -1,10 +1,11 @@
-package com.monitor.service.impl.contract;
+package com.monitor.service.impl.token;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.monitor.service.interfaces.TUSDService;
 import com.monitor.utils.HttpUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -15,8 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 @Service("bnbTUSDService")
+@Slf4j
 public class BNBTUSDServiceImpl extends TUSDService {
-    protected Logger logger = LoggerFactory.getLogger(getClass());
 
     private static final String TUSD = "TUSDB-888";
 
@@ -25,7 +26,7 @@ public class BNBTUSDServiceImpl extends TUSDService {
         try {
             return "totalSupply".equals(field) ? this.queryBnbTotalSupply(web3Provider.getRpcUrl(chain)).setScale(2, RoundingMode.UP).toString() : "";
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             return "N/A";
         }
     }

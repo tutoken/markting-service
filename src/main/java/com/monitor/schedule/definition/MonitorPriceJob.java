@@ -14,7 +14,7 @@ import static com.monitor.constants.Monitor.TUSD_PRICE;
 public class MonitorPriceJob extends ScheduleJobDefinition {
     @Override
     public void run() {
-        String price = marketSiteService.currentPrice("TUSD", "USD");
+        String price = tokenService.currentPrice("TUSD", "USD");
         if (price != null && !"".equals(price)) {
             BigDecimal currentPrice = new BigDecimal(price);
             if (currentPrice.compareTo(TUSD_PRICE) < 0) {
