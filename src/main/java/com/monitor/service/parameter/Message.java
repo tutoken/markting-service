@@ -1,5 +1,7 @@
 package com.monitor.service.parameter;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -46,12 +48,12 @@ public class Message extends LinkedHashSet<String> {
 
         for (int i = 1; i < content.length; i++) {
             content[i][0] = columnKeys[i - 1];
-            columnSize[0] = Math.max(columnSize[0], lengthOf(columnKeys[i - 1]));
+            columnSize[0] = Math.max(columnSize[0], StringUtils.length(columnKeys[i - 1]));
             alignments[i][0] = ALIGNMENT.LEFT;
 
             for (int j = 1; j < firstRow.length; j++) {
                 content[i][j] = getValue(contents, columnKeys[i - 1], firstRow[j]);
-                columnSize[j] = Math.max(columnSize[j], lengthOf(content[i][j]));
+                columnSize[j] = Math.max(columnSize[j], StringUtils.length(content[i][j]));
                 alignments[i][j] = ALIGNMENT.RIGHT;
             }
         }
@@ -74,10 +76,6 @@ public class Message extends LinkedHashSet<String> {
         return String.format("```%s```", result);
     }
 
-    private int lengthOf(String s) {
-        return s == null ? 0 : s.length();
-    }
-
     private String getValue(Map<String, ?> contents, String key1, String key2) {
         Object content = contents.get(key1);
         if (content == null) {
@@ -91,7 +89,7 @@ public class Message extends LinkedHashSet<String> {
     }
 
     private String format(String content, int size, ALIGNMENT align) {
-        int length = size - lengthOf(content);
+        int length = size - StringUtils.length(content);
         if (size <= 0) {
             return content;
         }
