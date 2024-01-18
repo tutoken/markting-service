@@ -21,6 +21,7 @@ import java.util.Map;
 
 import static com.monitor.constants.Token.TUSD;
 import static com.monitor.constants.Topics.TOPIC;
+import static com.monitor.constants.Topics.TRANSACTION_TYPE;
 import static com.monitor.utils.CommonUtil.GET_AMOUNT_VALUE;
 import static org.web3j.utils.Numeric.toHexStringWithPrefix;
 
@@ -52,16 +53,9 @@ public abstract class DefaultChainService implements ChainJsonRpcService, ChainS
 
     @Override
     public Map<String, Map<String, String>> getTransactionsByEvent(QueryParam queryParam) {
-        JSONObject payload = new JSONObject()
-                .fluentPut("jsonrpc", "2.0")
-                .fluentPut("method", queryParam.getMethod())
-                .fluentPut("id", "1");
+        JSONObject payload = new JSONObject().fluentPut("jsonrpc", "2.0").fluentPut("method", queryParam.getMethod()).fluentPut("id", "1");
 
-        JSONObject param = new JSONObject()
-                .fluentPut("address", queryParam.getAddress())
-                .fluentPut("topics", TOPIC(queryParam.getTopic()))
-                .fluentPut("fromBlock", toHexStringWithPrefix(new BigInteger(queryParam.getStartBlock())))
-                .fluentPut("toBlock", toHexStringWithPrefix(new BigInteger(queryParam.getEndBlock())));
+        JSONObject param = new JSONObject().fluentPut("address", queryParam.getAddress()).fluentPut("topics", TOPIC(queryParam.getTopic())).fluentPut("fromBlock", toHexStringWithPrefix(new BigInteger(queryParam.getStartBlock()))).fluentPut("toBlock", toHexStringWithPrefix(new BigInteger(queryParam.getEndBlock())));
 
         JSONArray params = new JSONArray().fluentAdd(param);
         payload.put("params", params);
@@ -103,6 +97,7 @@ public abstract class DefaultChainService implements ChainJsonRpcService, ChainS
 
             BigDecimal gasUsedValue = new BigDecimal(info.get("gasPrice")).multiply(new BigDecimal(info.get("gasUsed")));
             info.put("gasUsedValue", String.valueOf(gasUsedValue));
+            info.put("type", queryParam.getTopic() == null ? TRANSACTION_TYPE(topics) : queryParam.getTopic());
 
             result.put(trx_hash, info);
         }

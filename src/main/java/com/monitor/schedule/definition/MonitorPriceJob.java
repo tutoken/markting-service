@@ -18,8 +18,8 @@ public class MonitorPriceJob extends ScheduleJobDefinition {
         if (price != null && !"".equals(price)) {
             BigDecimal currentPrice = new BigDecimal(price);
             if (currentPrice.compareTo(TUSD_PRICE) < 0) {
-                slackService.sendNotice("tusd", String.format("```%s```", String.format("Current price is $%s", price)));
-                slackService.sendNotice("tusd", Slack.WARNING + slack.getID("Peggy") + slack.getID("Teresa") + slack.getID("Maria"));
+                slackService.sendCodeBlockMessage("tusd", String.format("Current price is $%s", price));
+                slackService.sendDirectMessage("tusd", Slack.WARNING + slack.getID("Peggy") + slack.getID("Teresa") + slack.getID("Maria"));
             }
         }
     }

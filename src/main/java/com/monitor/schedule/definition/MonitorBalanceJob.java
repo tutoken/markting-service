@@ -1,6 +1,7 @@
 package com.monitor.schedule.definition;
 
 import com.monitor.constants.Slack;
+import com.monitor.service.parameter.Message;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -18,28 +19,35 @@ import static com.monitor.utils.CommonUtil.FORMAT;
 @Slf4j
 public class MonitorBalanceJob extends ScheduleJobDefinition {
 
+    private static final String[] title = new String[]{"Address", "Chain", "Balance"};
+
     @Override
     protected void run() {
-        slackService.init();
+        Message message = new Message();
+        Map<String, Map<String, String>> waringTable = new HashMap<>();
 
         for (String chain : monitor.getNativelyChains()) {
             List<String> addresses = monitor.getAddress(chain);
             if (CollectionUtils.isEmpty(addresses)) {
                 continue;
             }
+
             for (String address : addresses) {
                 BigDecimal balance = tokenService.getBalance(chain, address);
                 if (balance.compareTo(new BigDecimal(monitor.getBalanceThreshold(chain))) < 0) {
-                    Map<String, String> message = new HashMap<>();
-                    message.put("Balance", balance.divide(DECIMAL18, 18, RoundingMode.HALF_UP).toString());
-                    message.put("Chain", chain);
-                    slackService.addMessage(address, message);
-                    slackService.addWarning(String.format("Balance of %s is too low: %s", slack.getLink(chain, address, address), FORMAT(balance.toString())));
-                    slackService.addWarning(Slack.WARNING + slack.getID("Tahoe") + slack.getID("Lily") + slack.getID("Hosea"));
+                    message.addDirectMessage(String.format("Balance of %s is too low: %s", slack.getLink(chain, address, address), FORMAT(balance.toString())));
+                    message.addDirectMessage(String.format("%s%s%s%s", Slack.WARNING, slack.getID("Tahoe"), slack.getID("Lily"), slack.getID("Hosea")));
+
+                    Map<String, String> balanceMap = Map.of("Chain", chain, "Balance", balance.divide(DECIMAL18, 18, RoundingMode.HALF_UP).toString());
+                    waringTable.put(address, balanceMap);
                 }
             }
         }
 
-        slackService.sendAsTable("tusd");
+
+        if (!waringTable.isEmpty()) {
+            message.addTable(title, waringTable);
+            slackService.sendMessage("tusd", message);
+        }
     }
 }

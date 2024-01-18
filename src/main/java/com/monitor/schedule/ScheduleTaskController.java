@@ -21,9 +21,13 @@ public class ScheduleTaskController {
     @Autowired
     private ScheduleTaskGroup scheduleTaskGroup;
 
+    public void execute(String job) {
+        scheduleTaskGroup.execute(List.of(job));
+    }
+
     @Scheduled(cron = "0 0 * * *  ?")
     public void task1() {
-        scheduleTaskGroup.execute(List.of("MonitorLaunchPadJob"));
+//        scheduleTaskGroup.execute(List.of("MonitorLaunchPadJob", "MonitorBalanceJob", "MonitorMintPoolJob", "MonitorPriceJob", "MonitorRipcordsJob", "MonitorTotalSupplyJob"));
     }
 
     @Component
@@ -70,9 +74,9 @@ public class ScheduleTaskController {
                 } catch (Exception ex) {
                     log.error("run schedule task failed.", ex);
 
-                    slackService.sendNotice("test", String.format("%s exception, lastTimeStamp: %d, currentTimeStamp: %d, cause: %s", jobName, lastTimeStamp, currentTimeStamp, ex));
-                    slackService.sendNotice("test", ex.getMessage());
-                    slackService.sendNotice("test", String.format("%s%s", Slack.WARNING, slack.getID("Hosea")));
+                    slackService.sendDirectMessage("test", String.format("%s exception, lastTimeStamp: %d, currentTimeStamp: %d, cause: %s", jobName, lastTimeStamp, currentTimeStamp, ex));
+                    slackService.sendDirectMessage("test", ex.getMessage());
+                    slackService.sendDirectMessage("test", String.format("%s%s", Slack.WARNING, slack.getID("Hosea")));
                 } finally {
                     redisUtil.deleteBooleanKey(jobName);
                 }

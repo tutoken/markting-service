@@ -2,6 +2,7 @@ package com.monitor.api;
 
 import com.monitor.schedule.ScheduleTaskController;
 import com.monitor.service.ServiceContext;
+import com.monitor.service.interfaces.SlackService;
 import com.monitor.service.interfaces.TokenService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -32,6 +33,9 @@ public class MonitorController {
 
     @Autowired
     private ScheduleTaskController scheduleTaskController;
+
+    @Autowired
+    private SlackService slackService;
 
     @ApiOperation(value = "queryContract", httpMethod = "GET", notes = "Read the value of the corresponding field from the contract", response = Map.class)
     @RequestMapping("/contract")
@@ -73,7 +77,7 @@ public class MonitorController {
     }
 
     @ApiOperation(value = "totalSupply", httpMethod = "GET", notes = "Query the total supply at a given time")
-    @RequestMapping("/totalSupplyByTimestamp")
+    @RequestMapping("/totalSupply")
     public Map<String, BigDecimal> totalSupply(@RequestParam(name = "chain", required = false) String chain, @RequestParam(name = "time", required = false) String time) {
         return tokenService.queryTotalSupplyByTimestamp(chain, time);
     }
@@ -85,8 +89,14 @@ public class MonitorController {
     }
 
     @ApiOperation(value = "totalSupply", httpMethod = "GET", notes = "Query the total supply at a given time")
-    @RequestMapping("/test")
-    public void test() {
-        scheduleTaskController.task1();
+    @RequestMapping("/test/{job}")
+    public void test(@PathVariable String job) {
+        scheduleTaskController.execute(job);
+    }
+
+    @ApiOperation(value = "flush", httpMethod = "GET", notes = "Query the total supply at a given time")
+    @RequestMapping("/slack/flush")
+    public void flush() {
+        slackService.flush();
     }
 }

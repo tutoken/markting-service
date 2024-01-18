@@ -7,10 +7,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 @Slf4j
@@ -22,6 +19,9 @@ public class TimeUtil {
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         return format;
     });
+
+    private static final TimeZone timeZone = TimeZone.getTimeZone("GMT+8:00");
+
     private static long LAST_TIMESTAMP;
 
     public static void MARK(String tag, String step) {
@@ -55,31 +55,47 @@ public class TimeUtil {
     }
 
     public static String MONITOR(long stamp) {
-        // within 1 s
-        if (stamp < 1000) {
-//            return stamp + " ms";
-            return "";
+        StringBuilder sb = new StringBuilder();
+
+        // Calculate days
+        long days = stamp / 86400000;
+        if (days > 0) {
+            sb.append(days).append(days == 1 ? " day " : " days ");
+            stamp %= 86400000;
         }
-        // within 1 min
-        else if (stamp < 60000) {
-            long second = stamp / 1000;
-            return second + (second == 1L ? " second " : " seconds ") + MONITOR(stamp % 1000);
+
+        // Calculate hours
+        long hours = stamp / 3600000;
+        if (hours > 0) {
+            sb.append(hours).append(hours == 1 ? " hour " : " hours ");
+            stamp %= 3600000;
         }
-        // within 1 hour
-        else if (stamp < 3600000) {
-            long minute = stamp / 60000;
-            return minute + (minute == 1L ? " minute " : " minutes ") + MONITOR(stamp % 60000);
+
+        // Calculate minutes
+        long minutes = stamp / 60000;
+        if (minutes > 0) {
+            sb.append(minutes).append(minutes == 1 ? " minute " : " minutes ");
+            stamp %= 60000;
         }
-        // within 1 day
-        else if (stamp < 86400000) {
-            long hour = stamp / 3600000;
-            return hour + (hour == 1L ? " hour " : " hours ") + MONITOR(stamp % 3600000);
+
+        // Calculate seconds
+        long seconds = stamp / 1000;
+        if (seconds > 0) {
+            sb.append(seconds).append(seconds == 1 ? " second " : " seconds ");
+            stamp %= 1000;
         }
-        // longer
-        else {
-            long day = stamp / 86400000;
-            return day + (day == 1L ? " day " : " days ") + MONITOR(stamp % 86400000);
+
+        // Calculate milliseconds
+        if (stamp > 0) {
+            sb.append(stamp).append(" ms");
         }
+
+        // Trim trailing space if any
+        if (sb.length() > 0 && sb.charAt(sb.length() - 1) == ' ') {
+            sb.deleteCharAt(sb.length() - 1);
+        }
+
+        return sb.toString();
     }
 
     public static String GET_DATE_BY_STAMP(long timestamp) {
@@ -106,5 +122,13 @@ public class TimeUtil {
 
             log.info(operation + " execution time: " + duration + "ms");
         }
+    }
+
+    public static Date getTime(int hour, int minute, int second) {
+        Calendar calendar = Calendar.getInstance(timeZone);
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        calendar.set(Calendar.SECOND, second);
+        return calendar.getTime();
     }
 }

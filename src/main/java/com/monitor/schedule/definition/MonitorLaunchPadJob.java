@@ -58,19 +58,19 @@ public class MonitorLaunchPadJob extends ScheduleJobDefinition {
 
             if (!"".equals(message.toString())) {
                 if (status != null && !status.equals(value)) {
-                    slackService.sendNotice("tusd", String.format("```%s```", String.format("%s (%s)\nStatus: %s\nTime until farming ends: %s", rebateCoin, detailAbstract, status, TimeUtil.MONITOR(period))));
-                    slackService.sendNotice("tusd", String.format("```%s```", message.toString()));
-                    slackService.sendNotice("tusd", Slack.WARNING + slack.getID("Lily") + slack.getID("Tahoe"));
+                    slackService.sendCodeBlockMessage("tusd", String.format("%s (%s)\nStatus: %s\nTime until farming ends: %s", rebateCoin, detailAbstract, status, TimeUtil.MONITOR(period)));
+                    slackService.sendCodeBlockMessage("tusd", message.toString());
+                    slackService.sendDirectMessage("tusd", Slack.WARNING + slack.getID("Lily") + slack.getID("Tahoe"));
 
                     redisUtil.saveStringValue(key, status, 0, null);
                 }
 
                 if (period <= PERIOD && period > 0) {
-                    slackService.sendNotice("tusd", String.format("```%s```", String.format("%s (%s)\nTime until farming ends: %s", rebateCoin, detailAbstract, TimeUtil.MONITOR(period))));
-                    slackService.sendNotice("tusd", String.format("```%s```", message.toString()));
-                    slackService.sendNotice("tusd", Slack.WARNING + slack.getID("Lily") + slack.getID("Tahoe"));
+                    slackService.sendCodeBlockMessage("tusd", String.format("%s (%s)\nTime until farming ends: %s", rebateCoin, detailAbstract, TimeUtil.MONITOR(period)));
+                    slackService.sendCodeBlockMessage("tusd", message.toString());
+                    slackService.sendDirectMessage("tusd", Slack.WARNING + slack.getID("Lily") + slack.getID("Tahoe"));
 
-                    redisUtil.saveStringValue(key, "WARNED", 2, TimeUnit.HOURS);
+                    redisUtil.saveStringValue(key, "WARNED", 25, TimeUnit.HOURS);
                 }
             }
         }

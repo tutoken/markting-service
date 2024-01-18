@@ -1,6 +1,9 @@
 package com.monitor.constants;
 
+import org.springframework.util.CollectionUtils;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Topics {
@@ -28,5 +31,25 @@ public class Topics {
 
     public static String[] TOPIC(String topic) {
         return TOPICS.get(topic);
+    }
+
+    public static String TRANSACTION_TYPE(List<Object> topics) {
+        if (CollectionUtils.isEmpty(topics)) {
+            return "UNKNOWN";
+        }
+        String method = (String) topics.get(0);
+        for (Map.Entry<String, String[]> entry : TOPICS.entrySet()) {
+            if (method.equalsIgnoreCase(entry.getValue()[0])) {
+                if ("TRANSFER".equalsIgnoreCase(entry.getKey()) && IS_REDEMPTION_ADDRESS("")) {
+                    return "REDEEM";
+                }
+                return entry.getKey();
+            }
+        }
+        return "OTHER";
+    }
+
+    private static Boolean IS_REDEMPTION_ADDRESS(String address) {
+        return true;
     }
 }

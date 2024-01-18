@@ -1,33 +1,18 @@
 package com.monitor.service.interfaces;
 
-import com.slack.api.webhook.Payload;
-
-import java.util.Map;
+import com.monitor.service.parameter.Message;
 
 public interface SlackService {
 
-    /**
-     * Initialize, clear all unsent messages
-     */
-    void init();
+    String createScheduleMessage(String channel, String message, Integer postAt);
 
-    String sendSlackPost(String slackWebhook, String jsonStringBo) throws Exception;
+    String cancelScheduleMessage(String messageId);
 
-    String send(String slackWebhook, Payload payload);
+    void sendCodeBlockMessage(String channel, String message);
 
-    void sendNotice(String channel, String message);
+    void sendDirectMessage(String channel, String message);
 
-    void putDivide(String channel);
+    void sendMessage(String channel, Message message);
 
-    void sendAsTable(String channel);
-
-    void addMessage(String chain, Map<String, String> message);
-
-    void addDetail(String hash, Map<String, String> message);
-
-    void addTotalSupply(Map<String, String> message);
-
-    void addWarning(String warning);
-
-    void sendButton(String text, String url);
+    void flush();
 }

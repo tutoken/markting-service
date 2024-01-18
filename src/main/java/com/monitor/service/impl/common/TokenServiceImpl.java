@@ -16,7 +16,6 @@ import com.monitor.utils.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -24,7 +23,6 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -94,7 +92,7 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public Map<String, BigDecimal> queryTotalSupplyByTimestamp(String chain, String time) {
-        return null;
+        return this.queryTotalSupplyWithSummary();
     }
 
     @Override
@@ -126,8 +124,8 @@ public class TokenServiceImpl implements TokenService {
             redisUtil.saveStringValue(entry.getKey() + "_totalSupply", entry.getValue().toString(), 1, TimeUnit.MINUTES);
         }
 
-        supplies.put("Natively Supply", supplies.entrySet().stream().filter(entry -> monitor.getNativelyChains().contains(entry.getKey())).map(Map.Entry::getValue).reduce(BigDecimal.ZERO, BigDecimal::add));
-        supplies.put("Bridged Supply", supplies.entrySet().stream().filter(entry -> monitor.getBridgedChains().contains(entry.getKey())).map(Map.Entry::getValue).reduce(BigDecimal.ZERO, BigDecimal::add));
+        supplies.put("Natively Networks TotalSupply", supplies.entrySet().stream().filter(entry -> monitor.getNativelyChains().contains(entry.getKey())).map(Map.Entry::getValue).reduce(BigDecimal.ZERO, BigDecimal::add));
+        supplies.put("Bridged Networks TotalSupply", supplies.entrySet().stream().filter(entry -> monitor.getBridgedChains().contains(entry.getKey())).map(Map.Entry::getValue).reduce(BigDecimal.ZERO, BigDecimal::add));
 
         return supplies;
     }
@@ -193,28 +191,26 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public String ripcords() {
-        String response = HttpUtil.get(RIPCORD_URL);
+        String response = HttpUtil.get(RIPCORDS_URL);
+
         if (response == null) {
-            return null;
+            throw new RuntimeException("Can not find reserve information.");
         }
 
-        JSONArray data = JSON.parseArray(response);
+        JSONObject data = JSON.parseObject(response);
 
-        if (data == null) {
-            return null;
+        if (data == null || data.getString("ripcord") == null || data.getJSONArray("ripcordDetails") == null) {
+            throw new RuntimeException("Can not find reserve information.");
         }
 
-        Optional<Object> optional = data.stream().filter(obj -> ((JSONObject) obj).getString("accountName").equals("TrueUSD")).findFirst();
+        JSONArray ripcordDetails = data.getJSONArray("ripcordDetails");
 
-        if (optional.isPresent()) {
-            JSONObject ripcords = ((JSONObject) optional.get()).getJSONObject("ripcords");
-            if (ripcords != null) {
-                JSONArray status = ripcords.getJSONArray("status");
-                if (!CollectionUtils.isEmpty(status)) {
-                    return status.getString(0);
-                }
-                return null;
-            }
+        if (data.getBoolean("ripcord") && ripcordDetails.isEmpty()) {
+            throw new RuntimeException("Ripcord is true, but ripcord details is empty.");
+        }
+
+        if (!ripcordDetails.isEmpty()) {
+            return ripcordDetails.getString(0);
         }
 
         return null;
