@@ -75,7 +75,6 @@ public class ScheduleTaskController {
                     log.error("run schedule task failed.", ex);
 
                     slackService.sendDirectMessage("test", String.format("%s exception, lastTimeStamp: %d, currentTimeStamp: %d, cause: %s", jobName, lastTimeStamp, currentTimeStamp, ex));
-                    slackService.sendDirectMessage("test", ex.getMessage());
                     slackService.sendDirectMessage("test", String.format("%s%s", Slack.WARNING, slack.getID("Hosea")));
                 } finally {
                     redisUtil.deleteBooleanKey(jobName);

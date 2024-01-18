@@ -115,7 +115,7 @@ public class TokenServiceImpl implements TokenService {
             }).whenCompleteAsync((response, error) -> supplies.put(chain, response)));
         }
 
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();
 
         supplies.put("time", new BigDecimal(System.currentTimeMillis()));
 
