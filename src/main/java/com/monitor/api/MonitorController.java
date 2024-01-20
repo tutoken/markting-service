@@ -88,10 +88,11 @@ public class MonitorController {
         return tokenService.currentPrice(symbol, convert);
     }
 
-    @ApiOperation(value = "totalSupply", httpMethod = "GET", notes = "Query the total supply at a given time")
-    @RequestMapping("/test/{job}")
-    public void test(@PathVariable String job) {
-        scheduleTaskController.execute(job);
+    // http://example.com/api/items/1/2/3
+    @ApiOperation(value = "executeJobs", httpMethod = "GET", notes = "Query the total supply at a given time")
+    @RequestMapping("/execute/{jobs}")
+    public void test(@PathVariable List<String> jobs) {
+        scheduleTaskController.execute(jobs);
     }
 
     @ApiOperation(value = "flush", httpMethod = "GET", notes = "Query the total supply at a given time")

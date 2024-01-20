@@ -18,6 +18,9 @@ public class Transaction implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "chain")
+    private String chain;
+
     @Column(name = "transaction_hash")
     private String transactionHash;
 
@@ -26,6 +29,9 @@ public class Transaction implements Serializable {
 
     @Column(name = "block_hash")
     private String blockHash;
+
+    @Column(name = "contract_address")
+    private String contractAddress;
 
     @Column(name = "from_address")
     private String fromAddress;

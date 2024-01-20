@@ -9,9 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.math.BigInteger;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,9 +32,7 @@ public class SyncTransactionsJob extends ScheduleJobDefinition {
 //                    .substring(2), 16);
             String endBlock = serviceContext.chainServiceOf(chain).getLatestBlockNumber(chain);
 
-            QueryParam queryParam = QueryParam.builder()
-                    .contractAddress(token.getContract(chain))
-                    .startBlock(redisUtil.getStringValueOrDefault(lastBlockKey, "0x0"))
+            QueryParam queryParam = QueryParam.builder().contractAddress(token.getContract(chain)).startBlock(redisUtil.getStringValueOrDefault(lastBlockKey, "0x0"))
 //                    .topic("TRANSFER")
                     .endBlock(endBlock).offset(offset).build();
 

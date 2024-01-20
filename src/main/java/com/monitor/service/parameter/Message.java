@@ -14,6 +14,14 @@ public class Message extends LinkedHashSet<String> {
 
     private static final Integer FIX_WIDTH = 2;
 
+    private static final String DEFAULT_CONTENT = "N/A";
+
+    private static final String LINE = "-";
+
+    private static final String CORNER = "+";
+
+    private static final String BORDER = "|";
+
     public void addDirectMessage(String message) {
         super.add(message);
     }
@@ -58,8 +66,8 @@ public class Message extends LinkedHashSet<String> {
             }
         }
 
-        StringBuilder line = new StringBuilder("+");
-        Arrays.stream(columnSize).forEach(k -> line.append("-".repeat(k + FIX_WIDTH)).append("+"));
+        StringBuilder line = new StringBuilder(CORNER);
+        Arrays.stream(columnSize).forEach(k -> line.append(LINE.repeat(k + FIX_WIDTH)).append(CORNER));
 
         StringBuilder result = new StringBuilder(line);
         for (int i = 0; i < content.length; i++) {
@@ -68,7 +76,7 @@ public class Message extends LinkedHashSet<String> {
             result.append("\n|");
 
             for (int j = 0; j < strings.length; j++) {
-                result.append(format(strings[j], columnSize[j], alignments[i][j])).append("|");
+                result.append(format(strings[j], columnSize[j], alignments[i][j])).append(BORDER);
             }
             result.append("\n").append(line);
         }
@@ -79,11 +87,11 @@ public class Message extends LinkedHashSet<String> {
     private String getValue(Map<String, ?> contents, String key1, String key2) {
         Object content = contents.get(key1);
         if (content == null) {
-            return "N/A";
+            return DEFAULT_CONTENT;
         }
         if (content instanceof Map) {
             Object value = ((Map<?, ?>) content).get(key2);
-            return value == null ? "N/A" : value.toString();
+            return value == null ? DEFAULT_CONTENT : value.toString();
         }
         return content.toString();
     }

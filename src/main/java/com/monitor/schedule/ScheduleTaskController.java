@@ -21,8 +21,8 @@ public class ScheduleTaskController {
     @Autowired
     private ScheduleTaskGroup scheduleTaskGroup;
 
-    public void execute(String job) {
-        scheduleTaskGroup.execute(List.of(job));
+    public void execute(List<String> jobs) {
+        scheduleTaskGroup.execute(jobs);
     }
 
     @Scheduled(cron = "0 0 * * *  ?")
@@ -70,7 +70,11 @@ public class ScheduleTaskController {
                 }
                 try {
                     redisUtil.saveBooleanValue(jobName, true, 10, TimeUnit.MINUTES);
-                    scheduleJobContext.taskOf(jobName).launch(String.valueOf(lastTimeStamp), String.valueOf(currentTimeStamp));
+                    ScheduleJobDefinition job = scheduleJobContext.taskOf(jobName);
+                    if (job == null) {
+                        throw new RuntimeException(String.format("Can not find job %s definition", jobName));
+                    }
+                    job.launch(String.valueOf(lastTimeStamp), String.valueOf(currentTimeStamp));
                 } catch (Exception ex) {
                     log.error("run schedule task failed.", ex);
 
