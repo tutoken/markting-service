@@ -1,10 +1,13 @@
 package com.monitor.service.parameter;
 
+import com.monitor.constants.Slack;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Message extends LinkedHashSet<String> {
 
@@ -22,6 +25,9 @@ public class Message extends LinkedHashSet<String> {
 
     private static final String BORDER = "|";
 
+    @Autowired
+    private Slack slack;
+
     public void addDirectMessage(String message) {
         super.add(message);
     }
@@ -38,6 +44,16 @@ public class Message extends LinkedHashSet<String> {
     public void addTable(String[] title, String[] columnKeys, Map<String, ?> contents) {
         String table = this.createTable(title, columnKeys, contents);
         super.add(table);
+    }
+
+    public void addWaring(String... memberIds) {
+        if (memberIds.length < 1) {
+            super.add(Slack.WARNING);
+        }
+
+        String warningMembers = Arrays.stream(memberIds).map(memberId -> slack.getID(memberId)).collect(Collectors.joining());
+
+        super.add(String.format("%s%s", Slack.WARNING, warningMembers));
     }
 
     private String createTable(String[] firstRow, String[] columnKeys, Map<String, ?> contents) {

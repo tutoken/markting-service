@@ -1,11 +1,12 @@
 package com.monitor.schedule.definition;
 
-import com.monitor.constants.Slack;
+import com.monitor.schedule.base.ScheduleJobDefinition;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import static com.monitor.utils.TimeUtil.getTime;
 
@@ -21,9 +22,9 @@ public class MonitorRipcordsJob extends ScheduleJobDefinition {
     public void run() {
         String status = tokenService.ripcords();
         if (status != null && !"".equals(status)) {
-            slackService.sendCodeBlockMessage("tusd",  String.format("Current ripcords status is %s", status));
+            slackService.sendCodeBlockMessage("tusd", String.format("Current ripcords status is %s", status));
             if (betweenPeriod()) {
-                slackService.sendDirectMessage("tusd", Slack.WARNING + slack.getID("Chichan") + slack.getID("Lily"));
+                slackService.sendWarning("tusd", "Chichan", "Lily");
             }
         }
     }

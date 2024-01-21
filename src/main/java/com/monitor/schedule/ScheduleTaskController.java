@@ -1,90 +1,138 @@
 package com.monitor.schedule;
 
-import com.monitor.constants.Slack;
-import com.monitor.schedule.definition.ScheduleJobDefinition;
-import com.monitor.service.interfaces.SlackService;
-import com.monitor.utils.RedisUtil;
+import com.monitor.database.model.SchedulerJob;
+import com.monitor.database.model.SchedulerJobDetail;
+import com.monitor.database.repository.SchedulerJobDetailRepository;
+import com.monitor.database.repository.SchedulerJobRepository;
+import com.monitor.schedule.base.ScheduleTaskExecutor;
+import com.monitor.service.parameter.SchedulerResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.quartz.*;
+import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
-import java.util.HashMap;
+import javax.annotation.PostConstruct;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.Set;
 
 @Component
 @Slf4j
 public class ScheduleTaskController {
 
     @Autowired
-    private ScheduleTaskGroup scheduleTaskGroup;
+    private SchedulerJobRepository schedulerJobRepository;
 
-    public void execute(List<String> jobs) {
-        scheduleTaskGroup.execute(jobs);
-    }
+    @Autowired
+    private SchedulerJobDetailRepository schedulerJobDetailRepository;
 
-    @Scheduled(cron = "0 0 * * *  ?")
-    public void task1() {
-//        scheduleTaskGroup.execute(List.of("MonitorLaunchPadJob", "MonitorBalanceJob", "MonitorMintPoolJob", "MonitorPriceJob", "MonitorRipcordsJob", "MonitorTotalSupplyJob"));
-    }
+    @Autowired
+    private ScheduleTaskExecutor scheduleTaskExecutor;
 
-    @Component
-    static class ScheduleJobContext {
-        @Autowired
-        public final Map<String, ScheduleJobDefinition> taskDefinitionMap = new HashMap<>(2);
+    private Scheduler scheduler;
 
-        public ScheduleJobDefinition taskOf(String name) {
-            return taskDefinitionMap.get(name);
+    public void execute(List<String> definitions) {
+        List<SchedulerJobDetail> schedulerJobDetails = schedulerJobDetailRepository.findByDefinitionIn(definitions);
+        if (CollectionUtils.isEmpty(schedulerJobDetails)) {
+            return;
         }
+        scheduleTaskExecutor.execute(schedulerJobDetails);
     }
 
-    @Component
-    static class ScheduleTaskGroup {
+    private static final Map<String, Class<? extends ScheduleTaskExecutor>> map = new ConcurrentReferenceHashMap<>();
 
-        @Autowired
-        private ScheduleJobContext scheduleJobContext;
+    @PostConstruct
+    public SchedulerResponse initSchedulerJobs() {
+        this.getScheduler();
 
-        @Autowired
-        private SlackService slackService;
+        List<SchedulerJob> schedulerJobs = schedulerJobRepository.findAll();
 
-        @Autowired
-        private Slack slack;
+        if (CollectionUtils.isEmpty(schedulerJobs)) {
+            return null;
+        }
 
-        @Autowired
-        private RedisUtil redisUtil;
+        try {
+            Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.anyGroup());
+            for (JobKey jobKey : jobKeys) {
+                scheduler.deleteJob(jobKey);
+            }
+        } catch (SchedulerException e) {
+            log.error("Can not delete scheduler", e);
 
-        public void execute(List<String> jobs) {
+            return getSchedulerResult();
+        }
 
-            long lastTimeStamp = System.currentTimeMillis() - (1000 * 60 * 15);
-            long currentTimeStamp = lastTimeStamp - (1000 * 60 * 60);
+        schedulerJobs.forEach(schedulerJob -> {
+            if (schedulerJob == null) {
+                return;
+            }
+            JobDataMap map = new JobDataMap();
+            String description = schedulerJob.getDescription();
+            long groupId = schedulerJob.getId();
+            String executor = schedulerJob.getExecutor();
 
-            log.info(String.format("Execute currentTimeStamp is %d, lastTimeStamp is %d", currentTimeStamp, lastTimeStamp));
+            try {
+                JobDetail jobDetail = JobBuilder.newJob(getClass(executor)).withIdentity(String.valueOf(groupId), description).setJobData(map).build();
+                CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(schedulerJob.getCronExpression());
+                Trigger trigger = TriggerBuilder.newTrigger().withIdentity(String.valueOf(groupId), description).withSchedule(cronScheduleBuilder).build();
 
-            for (String jobName : jobs) {
-                log.info(String.format("Start running %s", jobName));
+                scheduler.scheduleJob(jobDetail, trigger);
 
-                if (redisUtil.getBooleanValue(jobName)) {
-                    log.error(jobName + " is running!");
-                }
-                try {
-                    redisUtil.saveBooleanValue(jobName, true, 10, TimeUnit.MINUTES);
-                    ScheduleJobDefinition job = scheduleJobContext.taskOf(jobName);
-                    if (job == null) {
-                        throw new RuntimeException(String.format("Can not find job %s definition", jobName));
-                    }
-                    job.launch(String.valueOf(lastTimeStamp), String.valueOf(currentTimeStamp));
-                } catch (Exception ex) {
-                    log.error("run schedule task failed.", ex);
+            } catch (SchedulerException | ClassNotFoundException e) {
+                log.error(String.format("Create scheduler job %s failed.", schedulerJob.getDescription()), e);
+            }
+        });
+        try {
+            scheduler.start();
+        } catch (SchedulerException e) {
+            log.error("Failed to start scheduler.", e);
+        }
+        return getSchedulerResult();
+    }
 
-                    slackService.sendDirectMessage("test", String.format("%s exception, lastTimeStamp: %d, currentTimeStamp: %d, cause: %s", jobName, lastTimeStamp, currentTimeStamp, ex));
-                    slackService.sendDirectMessage("test", String.format("%s%s", Slack.WARNING, slack.getID("Hosea")));
-                } finally {
-                    redisUtil.deleteBooleanKey(jobName);
-                }
+    private Class<? extends ScheduleTaskExecutor> getClass(String jobName) throws ClassNotFoundException {
+        if (map.containsKey(jobName)) {
+            return map.get(jobName);
+        }
+        Class<? extends ScheduleTaskExecutor> clazz = Class.forName(String.format("com.monitor.schedule.base.%s", jobName)).asSubclass(ScheduleTaskExecutor.class);
+        map.put(jobName, clazz);
 
-                log.info(jobName + " end");
+        return clazz;
+    }
+
+    public SchedulerResponse getSchedulerResult() {
+        this.getScheduler();
+        SchedulerResponse response = new SchedulerResponse();
+        try {
+            Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.anyJobGroup());
+            for (JobKey jobKey : jobKeys) {
+                Trigger trigger = scheduler.getTrigger(TriggerKey.triggerKey(jobKey.getName(), jobKey.getGroup()));
+                Date nextFireTime = trigger.getNextFireTime();
+
+                long groupId = Long.parseLong(jobKey.getName());
+                List<SchedulerJobDetail> schedulerJobDetails = schedulerJobDetailRepository.findByGroupIdOrderByPriority(groupId);
+                response.add(jobKey.getGroup(), schedulerJobDetails, nextFireTime.toString());
+                response.setStarted(scheduler.isStarted());
+            }
+        } catch (SchedulerException e) {
+            log.error("Get scheduler job details error.");
+            throw new RuntimeException(e);
+        }
+
+        return response;
+    }
+
+    private void getScheduler() {
+        if (scheduler == null) {
+            try {
+                scheduler = StdSchedulerFactory.getDefaultScheduler();
+            } catch (SchedulerException e) {
+                throw new RuntimeException(e);
             }
         }
     }

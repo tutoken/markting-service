@@ -1,6 +1,6 @@
 package com.monitor.schedule.definition;
 
-import com.monitor.constants.Slack;
+import com.monitor.schedule.base.ScheduleJobDefinition;
 import com.monitor.service.parameter.Message;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,8 +36,6 @@ public class MonitorBalanceJob extends ScheduleJobDefinition {
                 BigDecimal balance = tokenService.getBalance(chain, address);
                 if (balance.compareTo(new BigDecimal(monitor.getBalanceThreshold(chain))) < 0) {
                     message.addDirectMessage(String.format("Balance of %s is too low: %s", slack.getLink(chain, address, address), FORMAT(balance.toString())));
-                    message.addDirectMessage(String.format("%s%s%s%s", Slack.WARNING, slack.getID("Tahoe"), slack.getID("Lily"), slack.getID("Hosea")));
-
                     Map<String, String> balanceMap = Map.of("Chain", chain, "Balance", balance.divide(DECIMAL18, 18, RoundingMode.HALF_UP).toString());
                     waringTable.put(address, balanceMap);
                 }
@@ -47,6 +45,7 @@ public class MonitorBalanceJob extends ScheduleJobDefinition {
 
         if (!waringTable.isEmpty()) {
             message.addTable(title, waringTable);
+            message.addWaring("Tahoe", "Lily", "Hosea");
             slackService.sendMessage("tusd", message);
         }
     }

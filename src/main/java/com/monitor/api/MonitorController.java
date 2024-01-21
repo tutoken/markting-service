@@ -4,6 +4,7 @@ import com.monitor.schedule.ScheduleTaskController;
 import com.monitor.service.ServiceContext;
 import com.monitor.service.interfaces.SlackService;
 import com.monitor.service.interfaces.TokenService;
+import com.monitor.service.parameter.SchedulerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -90,8 +91,8 @@ public class MonitorController {
 
     // http://example.com/api/items/1/2/3
     @ApiOperation(value = "executeJobs", httpMethod = "GET", notes = "Query the total supply at a given time")
-    @RequestMapping("/execute/{jobs}")
-    public void test(@PathVariable List<String> jobs) {
+    @RequestMapping("/scheduler/execute/{jobs}")
+    public void executeSchedulerJobs(@PathVariable List<String> jobs) {
         scheduleTaskController.execute(jobs);
     }
 
@@ -99,5 +100,17 @@ public class MonitorController {
     @RequestMapping("/slack/flush")
     public void flush() {
         slackService.flush();
+    }
+
+    @ApiOperation(value = "config scheduler jobs", httpMethod = "GET", notes = "Query the total supply at a given time")
+    @RequestMapping("/scheduler/init")
+    public SchedulerResponse initSchedulerJobs() {
+        return scheduleTaskController.initSchedulerJobs();
+    }
+
+    @ApiOperation(value = "list scheduler jobs", httpMethod = "GET", notes = "Query the total supply at a given time")
+    @RequestMapping("/scheduler/list")
+    public SchedulerResponse listSchedulerJobs() {
+        return scheduleTaskController.getSchedulerResult();
     }
 }

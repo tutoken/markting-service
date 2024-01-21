@@ -2,6 +2,7 @@ package com.monitor.schedule.definition;
 
 import com.monitor.database.model.Transaction;
 import com.monitor.database.repository.TransactionRepository;
+import com.monitor.schedule.base.ScheduleJobDefinition;
 import com.monitor.service.parameter.QueryParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

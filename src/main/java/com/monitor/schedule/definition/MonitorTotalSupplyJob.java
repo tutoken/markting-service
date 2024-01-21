@@ -1,6 +1,7 @@
 package com.monitor.schedule.definition;
 
 import com.monitor.constants.Monitor;
+import com.monitor.schedule.base.ScheduleJobDefinition;
 import com.monitor.service.parameter.Message;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

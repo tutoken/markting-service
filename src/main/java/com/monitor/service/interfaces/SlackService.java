@@ -12,6 +12,8 @@ public interface SlackService {
 
     void sendDirectMessage(String channel, String message);
 
+    void sendWarning(String channel, String... memberIds);
+
     void sendMessage(String channel, Message message);
 
     void flush();

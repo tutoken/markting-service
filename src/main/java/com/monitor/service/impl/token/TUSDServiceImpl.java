@@ -102,7 +102,7 @@ public class TUSDServiceImpl extends TUSDService {
         return (RemoteFunctionCall<Object>) object;
     }
 
-    private Method invokeMethod(Class<? extends Contract> clazz, String name, Class... types) {
+    private Method invokeMethod(Class<? extends Contract> clazz, String name, Class<?>... types) {
         try {
             return clazz.getMethod(name, types);
         } catch (NoSuchMethodException e) {

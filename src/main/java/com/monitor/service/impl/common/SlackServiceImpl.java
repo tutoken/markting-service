@@ -13,11 +13,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static com.slack.api.Slack.getInstance;
 import static com.slack.api.model.block.Blocks.section;
@@ -58,6 +56,20 @@ public class SlackServiceImpl implements SlackService {
             this.send(channel, message);
         } catch (Exception ex) {
             log.error(String.format("Send message to  %s failed, message is %s", channel, message), ex);
+        }
+    }
+
+    @Override
+    public void sendWarning(String channel, String... memberIds) {
+        if (memberIds.length < 1) {
+            return;
+        }
+        String warningMembers = Arrays.stream(memberIds).map(memberId -> slack.getID(memberId)).collect(Collectors.joining());
+        String message = String.format("%s%s", Slack.WARNING, warningMembers);
+        try {
+            this.send(channel, String.format("%s%s", Slack.WARNING, warningMembers));
+        } catch (Exception ex) {
+            log.error(String.format("Send warning to  %s failed, detail is %s", channel, message), ex);
         }
     }
 

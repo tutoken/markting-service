@@ -3,12 +3,14 @@ package com.monitor.schedule.definition;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.monitor.constants.Slack;
+import com.monitor.schedule.base.ScheduleJobDefinition;
 import com.monitor.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -60,15 +62,14 @@ public class MonitorLaunchPadJob extends ScheduleJobDefinition {
                 if (status != null && !status.equals(value)) {
                     slackService.sendCodeBlockMessage("tusd", String.format("%s (%s)\nStatus: %s\nTime until farming ends: %s", rebateCoin, detailAbstract, status, TimeUtil.MONITOR(period)));
                     slackService.sendCodeBlockMessage("tusd", message.toString());
-                    slackService.sendDirectMessage("tusd", Slack.WARNING + slack.getID("Lily") + slack.getID("Tahoe"));
-
+                    slackService.sendWarning("tusd", "Lily", "Tahoe");
                     redisUtil.saveStringValue(key, status, 0, null);
                 }
 
                 if (period <= PERIOD && period > 0) {
                     slackService.sendCodeBlockMessage("tusd", String.format("%s (%s)\nTime until farming ends: %s", rebateCoin, detailAbstract, TimeUtil.MONITOR(period)));
                     slackService.sendCodeBlockMessage("tusd", message.toString());
-                    slackService.sendDirectMessage("tusd", Slack.WARNING + slack.getID("Lily") + slack.getID("Tahoe"));
+                    slackService.sendWarning("tusd", "Lily", "Tahoe");
 
                     redisUtil.saveStringValue(key, "WARNED", 25, TimeUnit.HOURS);
                 }

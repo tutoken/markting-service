@@ -1,17 +1,16 @@
-package com.monitor.schedule.definition;
+package com.monitor.schedule.base;
 
 import com.monitor.constants.Monitor;
 import com.monitor.constants.Slack;
 import com.monitor.constants.Token.TUSD;
 import com.monitor.constants.Web3Provider;
+import com.monitor.database.model.SchedulerJobDetail;
 import com.monitor.service.ServiceContext;
 import com.monitor.service.interfaces.SlackService;
 import com.monitor.service.interfaces.TokenService;
 import com.monitor.utils.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public abstract class ScheduleJobDefinition {
@@ -40,15 +39,15 @@ public abstract class ScheduleJobDefinition {
     @Autowired
     protected RedisUtil redisUtil;
 
-    protected String lastTimeStamp;
+    protected long currentTime;
 
-    protected String currentTimeStamp;
+    protected SchedulerJobDetail schedulerJobDetail;
 
     abstract protected void run();
 
-    public void launch(String lastTimeStamp, String currentTimeStamp) {
-        this.lastTimeStamp = lastTimeStamp;
-        this.currentTimeStamp = currentTimeStamp;
+    public void execute(long currentTime, SchedulerJobDetail schedulerJobDetail) {
+        this.currentTime = currentTime;
+        this.schedulerJobDetail = schedulerJobDetail;
         this.run();
     }
 }

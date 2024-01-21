@@ -27,7 +27,7 @@ public class Slack {
      * @return
      */
     public String getID(String name) {
-        return this.notice.containsKey(name) ? " <@" + this.notice.get(name) + "> " : "";
+        return this.notice.containsKey(name) ? " <@" + this.notice.get(name) + "> " : " <@" + this.notice.get("Hosea") + "> ";
     }
 
     /**

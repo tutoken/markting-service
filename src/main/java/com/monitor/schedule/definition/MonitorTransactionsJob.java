@@ -3,6 +3,7 @@ package com.monitor.schedule.definition;
 import com.monitor.constants.Token;
 import com.monitor.database.model.Transaction;
 import com.monitor.database.repository.TransactionRepository;
+import com.monitor.schedule.base.ScheduleJobDefinition;
 import com.monitor.service.parameter.Message;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.utils.DateUtils;
@@ -35,8 +36,7 @@ public class MonitorTransactionsJob extends ScheduleJobDefinition {
 
     @Override
     public void run() {
-
-        long fromTime = System.currentTimeMillis();
+        long fromTime = this.currentTime;
         long toTime = fromTime - (1000 * 60 * 60);
 
         List<Transaction> transactions = transactionRepository.findByCreatedAtBetween(fromTime, toTime);
@@ -64,6 +64,7 @@ public class MonitorTransactionsJob extends ScheduleJobDefinition {
             Message message = new Message();
             message.addDirectMessage(alarm);
             message.addTable(title, transactionInfo);
+            message.addWaring("Hosea", "Lily");
             slackService.sendMessage("tusd", message);
         }
     }
