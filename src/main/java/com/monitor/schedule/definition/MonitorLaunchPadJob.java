@@ -7,6 +7,7 @@ import com.monitor.schedule.base.ScheduleJobDefinition;
 import com.monitor.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -19,11 +20,14 @@ public class MonitorLaunchPadJob extends ScheduleJobDefinition {
 
     private static final Long PERIOD = 24 * 60 * 60 * 1000L;
 
-    private static final String BASE_URL = "https://launchpad.binance.com/en/launchpool/";
+    private static final String BASE_URL = "https://launchpad.binance.com/bapi/lending/v1/friendly/launchpool/project/listV3?pageSize=100";
 
     @Override
     public void run() {
         JSONArray trackingList = tokenService.getLaunchPool();
+        if (CollectionUtils.isEmpty(trackingList)) {
+            return;
+        }
 
         for (Object launchPool : trackingList) {
             JSONObject tracking = (JSONObject) launchPool;
