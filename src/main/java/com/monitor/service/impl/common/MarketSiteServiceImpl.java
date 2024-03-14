@@ -241,11 +241,13 @@ public class MarketSiteServiceImpl implements MarketSiteService {
     }
 
     @Override
-    public MarketSiteDisplays getMarketSiteDisplays(Type type) {
-        return marketSiteDisplaysRepository.findTopByTypeOrderByVersionDesc(type)
+    public Map<String, String> getMarketSiteDisplays(Type type) {
+        MarketSiteDisplays marketSiteDisplays = marketSiteDisplaysRepository.findTopByTypeOrderByVersionDesc(type)
                 .orElseGet(() -> {
                     log.warn("No MarketSiteDisplays found for type: {}", type);
                     return new MarketSiteDisplays();
                 });
+
+        return marketSiteDisplays.getDisplays();
     }
 }

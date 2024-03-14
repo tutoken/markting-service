@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Map;
 
 
 @Entity
@@ -28,6 +29,13 @@ public class MarketSiteDisplays implements Serializable {
     private boolean enable;
 
     public enum Type {
-        Banner
+        announcement
+    }
+
+    public Map<String, String> getDisplays() {
+        String content = this.content == null ? "" : this.content;
+        String enable = Boolean.toString(this.enable);
+
+        return Map.of("content", content, "enable", enable);
     }
 }

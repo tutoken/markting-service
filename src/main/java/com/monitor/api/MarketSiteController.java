@@ -1,6 +1,5 @@
 package com.monitor.api;
 
-import com.monitor.database.model.MarketSiteDisplays;
 import com.monitor.schedule.ScheduleTaskController;
 import com.monitor.service.interfaces.EMailService;
 import com.monitor.service.interfaces.MarketSiteService;
@@ -20,7 +19,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
-import static com.monitor.database.model.MarketSiteDisplays.Type.Banner;
+import static com.monitor.database.model.MarketSiteDisplays.Type.announcement;
 
 @RestController
 @EnableSwagger2
@@ -107,10 +106,10 @@ public class MarketSiteController {
     }
 
 
-    @ApiOperation(value = "banner", httpMethod = "GET", notes = "Get Banner")
-    @RequestMapping("/banner")
-    MarketSiteDisplays banner() {
-        return marketSiteService.getMarketSiteDisplays(Banner);
+    @ApiOperation(value = "announcement", httpMethod = "GET", notes = "Get announcement")
+    @RequestMapping("/announcement")
+    Map<String, String> banner() {
+        return marketSiteService.getMarketSiteDisplays(announcement);
     }
 
 }
