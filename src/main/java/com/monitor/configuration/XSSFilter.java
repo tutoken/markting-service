@@ -58,17 +58,21 @@ public class XSSFilter extends FormContentFilter {
 
         public XSSHttpServletRequestWrapper(HttpServletRequest request) {
             super(request);
+            String requestBodyStr = getRequestPostStr(request);
 
             try {
-                String requestBodyStr = getRequestPostStr(request);
                 if (StringUtils.isNotBlank(requestBodyStr)) {
                     this.filter(JSONObject.parseObject(requestBodyStr));
                     requestBody = requestBodyStr.getBytes(charSet);
                 } else {
                     requestBody = new byte[0];
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (Exception exception) {
+                log.error("Failed to filter request body.");
+                String cleanedValue = Jsoup.clean(requestBodyStr, "", whitelist, outputSettings).trim();
+                if (!requestBodyStr.equals(cleanedValue)) {
+                    throw new IllegalArgumentException(String.format("%s contains illegal character!", requestBodyStr));
+                }
             }
         }
 
@@ -93,14 +97,19 @@ public class XSSFilter extends FormContentFilter {
             }
         }
 
-        public String getRequestPostStr(HttpServletRequest request) throws IOException {
-            String charSetStr = request.getCharacterEncoding();
-            if (charSetStr == null) {
-                charSetStr = "UTF-8";
+        public String getRequestPostStr(HttpServletRequest request) {
+            String requestStr = "";
+            try {
+                String charSetStr = request.getCharacterEncoding();
+                if (charSetStr == null) {
+                    charSetStr = "UTF-8";
+                }
+                charSet = Charset.forName(charSetStr);
+                requestStr = StreamUtils.copyToString(request.getInputStream(), charSet);
+            } catch (IOException exception) {
+                log.error("Decode request string failed ", exception);
             }
-            charSet = Charset.forName(charSetStr);
-
-            return StreamUtils.copyToString(request.getInputStream(), charSet);
+            return requestStr;
         }
 
         @Override
