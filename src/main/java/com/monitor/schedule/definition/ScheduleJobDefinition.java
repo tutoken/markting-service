@@ -5,6 +5,7 @@ import com.monitor.constants.Slack;
 import com.monitor.constants.Token.TUSD;
 import com.monitor.constants.Web3Provider;
 import com.monitor.service.ServiceContext;
+import com.monitor.service.interfaces.DailyReportService;
 import com.monitor.service.interfaces.MarketSiteService;
 import com.monitor.service.interfaces.SlackService;
 import com.monitor.service.interfaces.Web3Service;
@@ -19,6 +20,9 @@ public abstract class ScheduleJobDefinition {
 
     @Autowired
     protected MarketSiteService marketSiteService;
+
+    @Autowired
+    protected DailyReportService dailyReportService;
 
     @Autowired
     protected Web3Service web3Service;

@@ -1,12 +1,12 @@
 package com.monitor.service.impl.common;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.monitor.constants.Monitor;
 import com.monitor.constants.Slack;
 import com.monitor.constants.Token.TUSD;
 import com.monitor.constants.Web3Provider;
+import com.monitor.database.repository.DailyReportRepository;
 import com.monitor.database.repository.EcosystemRepository;
 import com.monitor.service.ServiceContext;
 import com.monitor.service.interfaces.MarketSiteService;
@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -27,10 +26,10 @@ import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import static com.monitor.constants.ThirdPartyService.*;
+import static com.monitor.constants.ThirdPartyService.COIN_MARKET_CURRENCY;
+import static com.monitor.constants.ThirdPartyService.COIN_MARKET_TRADING_VOLUME;
 
 /**
  * All externally provided interfaces
@@ -65,6 +64,9 @@ public class MarketSiteServiceImpl implements MarketSiteService {
 
     @Autowired
     private EcosystemRepository ecosystemRepository;
+
+    @Autowired
+    private DailyReportRepository dailyReportRepository;
 
     @Value("${upload.filepath}")
     private String filePath;
@@ -203,34 +205,5 @@ public class MarketSiteServiceImpl implements MarketSiteService {
         } catch (IOException e) {
             log.error("Upload file failed.", e);
         }
-    }
-
-    @Override
-    public String ripcords() {
-        String response = HttpUtil.get(RIPCORD_URL);
-        if (response == null) {
-            return null;
-        }
-
-        JSONArray data = JSON.parseArray(response);
-
-        if (data == null) {
-            return null;
-        }
-
-        Optional<Object> optional = data.stream().filter(obj -> ((JSONObject) obj).getString("accountName").equals("TrueUSD")).findFirst();
-
-        if (optional.isPresent()) {
-            JSONObject ripcords = ((JSONObject) optional.get()).getJSONObject("ripcords");
-            if (ripcords != null) {
-                JSONArray status = ripcords.getJSONArray("status");
-                if (!CollectionUtils.isEmpty(status)) {
-                    return status.getString(0);
-                }
-                return null;
-            }
-        }
-
-        return null;
     }
 }
