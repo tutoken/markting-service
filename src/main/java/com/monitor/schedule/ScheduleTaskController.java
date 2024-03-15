@@ -24,11 +24,6 @@ public class ScheduleTaskController {
         scheduleTaskGroup.execute(List.of("UpdateTotalTransactionContJob"));
     }
 
-    @Scheduled(cron = "0 30 8 * * ?")
-    public void task2() {
-        scheduleTaskGroup.execute(List.of("CreateDailyReportJob"));
-    }
-
     @Component
     static class ScheduleJobContext {
         @Autowired

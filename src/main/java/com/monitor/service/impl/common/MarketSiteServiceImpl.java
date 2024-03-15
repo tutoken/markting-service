@@ -7,7 +7,10 @@ import com.monitor.constants.Monitor;
 import com.monitor.constants.Slack;
 import com.monitor.constants.Token.TUSD;
 import com.monitor.constants.Web3Provider;
+import com.monitor.database.model.MarketSiteDisplays;
+import com.monitor.database.model.MarketSiteDisplays.Type;
 import com.monitor.database.repository.EcosystemRepository;
+import com.monitor.database.repository.MarketSiteDisplaysRepository;
 import com.monitor.service.ServiceContext;
 import com.monitor.service.interfaces.MarketSiteService;
 import com.monitor.service.interfaces.SlackService;
@@ -65,6 +68,9 @@ public class MarketSiteServiceImpl implements MarketSiteService {
 
     @Autowired
     private EcosystemRepository ecosystemRepository;
+
+    @Autowired
+    private MarketSiteDisplaysRepository marketSiteDisplaysRepository;
 
     @Value("${upload.filepath}")
     private String filePath;
@@ -232,5 +238,16 @@ public class MarketSiteServiceImpl implements MarketSiteService {
         }
 
         return null;
+    }
+
+    @Override
+    public Map<String, String> getMarketSiteDisplays(Type type) {
+        MarketSiteDisplays marketSiteDisplays = marketSiteDisplaysRepository.findTopByTypeOrderByVersionDesc(type)
+                .orElseGet(() -> {
+                    log.warn("No MarketSiteDisplays found for type: {}", type);
+                    return new MarketSiteDisplays();
+                });
+
+        return marketSiteDisplays.getDisplays();
     }
 }

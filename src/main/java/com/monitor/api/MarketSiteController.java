@@ -19,6 +19,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+import static com.monitor.database.model.MarketSiteDisplays.Type.announcement;
+
 @RestController
 @EnableSwagger2
 @Api(value = "Monitor")
@@ -104,5 +106,10 @@ public class MarketSiteController {
     }
 
 
+    @ApiOperation(value = "announcement", httpMethod = "GET", notes = "Get announcement")
+    @RequestMapping("/announcement")
+    Map<String, String> banner() {
+        return marketSiteService.getMarketSiteDisplays(announcement);
+    }
 
 }

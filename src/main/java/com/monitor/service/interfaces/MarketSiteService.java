@@ -1,5 +1,6 @@
 package com.monitor.service.interfaces;
 
+import com.monitor.database.model.MarketSiteDisplays.Type;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
@@ -42,6 +43,11 @@ public interface MarketSiteService {
      * @return
      */
     String ripcords();
+
+    /**
+     * Return the banner and the display switch indicating whether to show it
+     */
+    Map<String, String> getMarketSiteDisplays(Type type);
 }
 
 
