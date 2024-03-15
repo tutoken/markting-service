@@ -1,6 +1,7 @@
 package com.monitor.configuration;
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.monitor.exception.FilterExceptionResolver;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
@@ -58,25 +61,40 @@ public class XSSFilter extends FormContentFilter {
 
         public XSSHttpServletRequestWrapper(HttpServletRequest request) {
             super(request);
-            String requestBodyStr = getRequestPostStr(request);
-
+            Map<String, String[]> parameterMap = request.getParameterMap();
+            if (!request.getParameterMap().isEmpty()) {
+                for (java.util.Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
+                    if (!Jsoup.isValid(String.valueOf(entry.getKey()), whitelist) || Arrays.stream(entry.getValue())
+                            .anyMatch(value -> !Jsoup.isValid(value, whitelist))) {
+                        log.error(String.format("%s in query string contains illegal character!", parameterMap));
+                    }
+                }
+                throw new IllegalArgumentException("request contains illegal character!");
+            }
             try {
+                String requestBodyStr = getRequestPostStr(request);
+
                 if (StringUtils.isNotBlank(requestBodyStr)) {
-                    this.filter(JSONObject.parseObject(requestBodyStr));
+                    JSONObject requestObj = JSONObject.parseObject(requestBodyStr);
+                    this.filter(requestObj);
                     requestBody = requestBodyStr.getBytes(charSet);
                 } else {
                     requestBody = new byte[0];
                 }
-            } catch (Exception exception) {
+            } catch (IOException exception) {
                 log.error("Failed to filter request body.");
-                String cleanedValue = Jsoup.clean(requestBodyStr, "", whitelist, outputSettings).trim();
-                if (!requestBodyStr.equals(cleanedValue)) {
-                    throw new IllegalArgumentException(String.format("%s contains illegal character!", requestBodyStr));
-                }
+                throw new IllegalArgumentException("request contains illegal character!");
+
+            } catch (JSONException exception) {
+                log.error("Illegal request body.");
+                throw new IllegalArgumentException("Illegal request body!");
             }
         }
 
         public void filter(JSONObject json) {
+            if (json == null) {
+                return;
+            }
             for (String key : json.keySet()) {
                 Object value = json.get(key);
                 if (value instanceof JSONObject) {
@@ -97,19 +115,13 @@ public class XSSFilter extends FormContentFilter {
             }
         }
 
-        public String getRequestPostStr(HttpServletRequest request) {
-            String requestStr = "";
-            try {
-                String charSetStr = request.getCharacterEncoding();
-                if (charSetStr == null) {
-                    charSetStr = "UTF-8";
-                }
-                charSet = Charset.forName(charSetStr);
-                requestStr = StreamUtils.copyToString(request.getInputStream(), charSet);
-            } catch (IOException exception) {
-                log.error("Decode request string failed ", exception);
+        public String getRequestPostStr(HttpServletRequest request) throws IOException {
+            String charSetStr = request.getCharacterEncoding();
+            if (charSetStr == null) {
+                charSetStr = "UTF-8";
             }
-            return requestStr;
+            charSet = Charset.forName(charSetStr);
+            return StreamUtils.copyToString(request.getInputStream(), charSet);
         }
 
         @Override
