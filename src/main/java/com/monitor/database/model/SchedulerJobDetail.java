@@ -1,6 +1,5 @@
 package com.monitor.database.model;
 
-import lombok.Builder;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -9,6 +8,7 @@ import java.io.Serializable;
 @Entity
 @Data
 @Table(name = "schedule_job_detail")
+//@TypeDef(name = "string-array", typeClass = StringArrayType.class)
 public class SchedulerJobDetail implements Serializable {
 
     @Id
@@ -43,4 +43,14 @@ public class SchedulerJobDetail implements Serializable {
      */
     @Column(name = "mute")
     private int mute;
+
+    @Column(name = "channel")
+    private String channel;
+
+    //    @Type(type = "string-array")
+    //    @Column(name = "notification_recipient", columnDefinition = "text[]")
+    //    private List<String> recipients;
+
+    @Column(name = "notification_recipient")
+    private String recipients;
 }

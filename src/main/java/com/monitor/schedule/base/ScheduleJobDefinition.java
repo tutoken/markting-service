@@ -43,11 +43,22 @@ public abstract class ScheduleJobDefinition {
 
     protected SchedulerJobDetail schedulerJobDetail;
 
+    public String channel;
+
     abstract protected void run();
 
     public void execute(long currentTime, SchedulerJobDetail schedulerJobDetail) {
         this.currentTime = currentTime;
         this.schedulerJobDetail = schedulerJobDetail;
+        this.channel = this.schedulerJobDetail.getChannel();
         this.run();
+    }
+
+    public void noticeRecipients() {
+        slackService.sendWarning(getDefaultChannel(), schedulerJobDetail.getRecipients().split(","));
+    }
+
+    public String getDefaultChannel() {
+        return schedulerJobDetail.getChannel();
     }
 }

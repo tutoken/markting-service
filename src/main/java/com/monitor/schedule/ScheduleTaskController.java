@@ -1,9 +1,12 @@
 package com.monitor.schedule;
 
+import com.monitor.constants.Slack;
 import com.monitor.database.model.SchedulerJob;
 import com.monitor.database.model.SchedulerJobDetail;
+import com.monitor.database.model.SystemParameter;
 import com.monitor.database.repository.SchedulerJobDetailRepository;
 import com.monitor.database.repository.SchedulerJobRepository;
+import com.monitor.database.repository.SystemParametersRepository;
 import com.monitor.schedule.base.ScheduleTaskExecutor;
 import com.monitor.service.parameter.SchedulerResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +23,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -34,6 +38,12 @@ public class ScheduleTaskController {
     @Autowired
     private ScheduleTaskExecutor scheduleTaskExecutor;
 
+    @Autowired
+    private Slack slack;
+
+    @Autowired
+    private SystemParametersRepository systemParametersRepository;
+
     private Scheduler scheduler;
 
     public void execute(List<String> definitions) {
@@ -47,6 +57,25 @@ public class ScheduleTaskController {
     private static final Map<String, Class<? extends ScheduleTaskExecutor>> map = new ConcurrentReferenceHashMap<>();
 
     @PostConstruct
+    public void init() {
+        initSlack();
+        initSchedulerJobs();
+    }
+
+    public void initSlack() {
+        List<SystemParameter> systemParameters = systemParametersRepository.findByType("slack");
+
+        Map<String, Map<String, String>> groupedByNameValue = systemParameters.stream()
+                .collect(Collectors.groupingBy(SystemParameter::getType,
+                        Collectors.toMap(
+                                sp -> Integer.toString(sp.getName()), SystemParameter::getValue
+                        )
+                ));
+
+        slack.setWebhook(groupedByNameValue.get("slack_webhook"));
+        slack.setNotice(groupedByNameValue.get("slack_member"));
+    }
+
     public SchedulerResponse initSchedulerJobs() {
         this.getScheduler();
 

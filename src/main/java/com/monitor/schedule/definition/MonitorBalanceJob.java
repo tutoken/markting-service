@@ -45,8 +45,8 @@ public class MonitorBalanceJob extends ScheduleJobDefinition {
 
         if (!waringTable.isEmpty()) {
             message.addTable(title, waringTable);
-            message.addWaring("Tahoe", "Lily", "Hosea");
-            slackService.sendMessage("tusd", message);
+            slackService.sendMessage(getDefaultChannel(), message);
+            this.noticeRecipients();
         }
     }
 }

@@ -44,7 +44,7 @@ public class MonitorMintPoolJob extends ScheduleJobDefinition {
 
         message.addTable(title, table);
 
-        slackService.sendMessage("tusd", message);
+        slackService.sendMessage(getDefaultChannel(), message);
     }
 
     private Map<String, String> queryPool(TUSDService tusdService, String chain, String t1, String t2) {

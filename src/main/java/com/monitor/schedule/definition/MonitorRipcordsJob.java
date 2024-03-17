@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import static com.monitor.utils.TimeUtil.getTime;
 
@@ -22,9 +21,10 @@ public class MonitorRipcordsJob extends ScheduleJobDefinition {
     public void run() {
         String status = tokenService.ripcords();
         if (status != null && !"".equals(status)) {
-            slackService.sendCodeBlockMessage("tusd", String.format("Current ripcords status is %s", status));
+            slackService.sendCodeBlockMessage(getDefaultChannel(), String.format("Current ripcords status is %s", status));
             if (betweenPeriod()) {
-                slackService.sendWarning("tusd", "Chichan", "Lily");
+//                slackService.sendWarning("tusd", "Chichan", "Lily");
+                noticeRecipients();
             }
         }
     }

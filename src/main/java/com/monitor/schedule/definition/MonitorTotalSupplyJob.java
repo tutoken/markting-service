@@ -31,6 +31,6 @@ public class MonitorTotalSupplyJob extends ScheduleJobDefinition {
         message.addCodeBlockMessage(String.format("Bridged Networks TotalSupply: %s", supplies.get("Bridged Networks TotalSupply")));
         message.addTable(title, monitor.getBridgedChains().toArray(String[]::new), supplies);
 
-        slackService.sendMessage("tusd", message);
+        slackService.sendMessage(getDefaultChannel(), message);
     }
 }
