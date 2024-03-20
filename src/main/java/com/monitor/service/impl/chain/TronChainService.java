@@ -8,6 +8,7 @@ import com.monitor.utils.HttpUtil;
 import com.monitor.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -66,27 +67,27 @@ public class TronChainService extends DefaultChainService {
 //        return JSON.parseObject(response).getJSONArray("data").getJSONObject(0);
 //    }
 
-//    @Override
-//    public BigDecimal getBalance(String address) {
-//        String url = "https://apilist.tronscanapi.com/api/account/tokens?address=" + address + "&start=0&limit=20&hidden=0&show=0&sortType=0&sortBy=0&token=" + "TRX";
-//
-//        String result = HttpUtil.get(url);
-//        if (result == null) {
-//            return null;
-//        }
-//
-//        JSONObject balanceResult = JSONObject.parseObject(result);
-//        JSONArray balances = balanceResult.getJSONArray("data");
-//
-//        if (!CollectionUtils.isEmpty(balances)) {
-//            JSONObject tUSDBalance = balances.getJSONObject(0);
-//            if (tUSDBalance != null) {
-//                return tUSDBalance.getBigDecimal("quantity");
-//            }
-//        }
-//
-//        return null;
-//    }
+    @Override
+    public BigDecimal getBalance(String chain, String address) {
+        String url = "https://apilist.tronscanapi.com/api/account/tokens?address=" + address + "&start=0&limit=20&hidden=0&show=0&sortType=0&sortBy=0&token=" + "TRX";
+
+        String result = HttpUtil.get(url);
+        if (result == null) {
+            return null;
+        }
+
+        JSONObject balanceResult = JSONObject.parseObject(result);
+        JSONArray balances = balanceResult.getJSONArray("data");
+
+        if (!CollectionUtils.isEmpty(balances)) {
+            JSONObject tUSDBalance = balances.getJSONObject(0);
+            if (tUSDBalance != null) {
+                return tUSDBalance.getBigDecimal("quantity");
+            }
+        }
+
+        return null;
+    }
 //
 //    @Override
 //    public String getBlockByTimestamp(String timestamp) {

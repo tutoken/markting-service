@@ -64,7 +64,6 @@ public class MonitorTransactionsJob extends ScheduleJobDefinition {
             Message message = new Message();
             message.addDirectMessage(alarm);
             message.addTable(title, transactionInfo);
-//            message.addWaring("Hosea", "Lily");
             this.sendMessage(message);
             this.noticeRecipients();
         }
