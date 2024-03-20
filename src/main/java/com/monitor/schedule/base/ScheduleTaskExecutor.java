@@ -47,7 +47,7 @@ public class ScheduleTaskExecutor implements Job {
 
         this.execute(schedulerJobDetails.stream().filter(schedulerJobDetail -> {
             String definition = schedulerJobDetail.getDefinition();
-            if (schedulerJobDetail.getStatus() == 0) {
+            if (schedulerJobDetail.isEnable()) {
                 return true;
             }
             log.warn(String.format("%s is skipped.", definition));

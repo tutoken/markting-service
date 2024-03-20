@@ -8,6 +8,7 @@ import com.monitor.database.model.SchedulerJobDetail;
 import com.monitor.service.ServiceContext;
 import com.monitor.service.interfaces.SlackService;
 import com.monitor.service.interfaces.TokenService;
+import com.monitor.service.parameter.Message;
 import com.monitor.utils.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +53,15 @@ public abstract class ScheduleJobDefinition {
     }
 
     public void noticeRecipients() {
-        slackService.sendWarning(getDefaultChannel(), schedulerJobDetail.getRecipients().split(","));
+        if (schedulerJobDetail.isSendMessage()) {
+            slackService.sendWarning(getDefaultChannel(), schedulerJobDetail.getRecipients().split(","));
+        }
+    }
+
+    public void sendMessage(Message message) {
+        if (schedulerJobDetail.isSendAlert()) {
+            slackService.sendMessage(getDefaultChannel(), message);
+        }
     }
 
     public String getDefaultChannel() {

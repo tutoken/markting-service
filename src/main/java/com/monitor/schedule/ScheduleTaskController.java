@@ -1,11 +1,9 @@
 package com.monitor.schedule;
 
-import com.monitor.constants.Slack;
 import com.monitor.database.model.SchedulerJob;
 import com.monitor.database.model.SchedulerJobDetail;
 import com.monitor.database.repository.SchedulerJobDetailRepository;
 import com.monitor.database.repository.SchedulerJobRepository;
-import com.monitor.database.repository.SystemParametersRepository;
 import com.monitor.schedule.base.ScheduleTaskExecutor;
 import com.monitor.service.parameter.SchedulerResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +16,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 import javax.annotation.PostConstruct;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -37,6 +32,8 @@ public class ScheduleTaskController {
     private ScheduleTaskExecutor scheduleTaskExecutor;
 
     private Scheduler scheduler;
+
+    private static final TimeZone timeZone = TimeZone.getTimeZone("Asia/Shanghai");
 
     public void execute(List<String> definitions) {
         List<SchedulerJobDetail> schedulerJobDetails = schedulerJobDetailRepository.findByDefinitionIn(definitions);
@@ -84,7 +81,7 @@ public class ScheduleTaskController {
 
             try {
                 JobDetail jobDetail = JobBuilder.newJob(getClass(executor)).withIdentity(String.valueOf(groupId), description).setJobData(map).build();
-                CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(schedulerJob.getCronExpression());
+                CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(schedulerJob.getCronExpression()).inTimeZone(timeZone);
                 Trigger trigger = TriggerBuilder.newTrigger().withIdentity(String.valueOf(groupId), description).withSchedule(cronScheduleBuilder).build();
 
                 scheduler.scheduleJob(jobDetail, trigger);

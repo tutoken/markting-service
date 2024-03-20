@@ -12,15 +12,15 @@ import java.util.List;
 public class SchedulerResponse implements Serializable {
 
     boolean started;
-    List<SchedulerDetail> schedulerDetails = new ArrayList<>();
+    List<MonitorTaskDetail> monitorTaskDetails = new ArrayList<>();
 
     public void add(String name, List<SchedulerJobDetail> schedulerJobDetails, String nextRunTime) {
-        schedulerDetails.add(SchedulerDetail.builder().name(name).schedulerJobDetails(schedulerJobDetails).nextRunTime(nextRunTime).build());
+        monitorTaskDetails.add(MonitorTaskDetail.builder().name(name).schedulerJobDetails(schedulerJobDetails).nextRunTime(nextRunTime).build());
     }
 
     @Builder
     @Data
-    static class SchedulerDetail implements Serializable {
+    static class MonitorTaskDetail implements Serializable {
         String name;
         List<SchedulerJobDetail> schedulerJobDetails;
         String nextRunTime;

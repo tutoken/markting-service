@@ -1,5 +1,6 @@
 package com.monitor.database.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -12,9 +13,11 @@ import java.io.Serializable;
 public class SchedulerJobDetail implements Serializable {
 
     @Id
+    @JsonIgnore
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnore
     @Column(name = "group_id", nullable = false)
     private Long groupId;
 
@@ -34,13 +37,15 @@ public class SchedulerJobDetail implements Serializable {
      * 0-enabled
      * 1-disabled
      */
+    @JsonIgnore
     @Column(name = "status")
     private int status;
 
     /**
-     * 0-alarm
-     * 1-mute
+     * 0_ -alert
+     * _0 -message
      */
+    @JsonIgnore
     @Column(name = "mute")
     private int mute;
 
@@ -53,4 +58,17 @@ public class SchedulerJobDetail implements Serializable {
 
     @Column(name = "notification_recipient")
     private String recipients;
+
+    public boolean isSendMessage() {
+        return (mute & 1) == 0;
+    }
+
+    public boolean isSendAlert() {
+        return (mute >> 1) == 0;
+    }
+
+    public boolean isEnable() {
+        return status == 0;
+    }
+
 }
