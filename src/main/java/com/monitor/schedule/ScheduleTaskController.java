@@ -63,12 +63,12 @@ public class ScheduleTaskController {
     }
 
     public void initSlack() {
-        List<SystemParameter> systemParameters = systemParametersRepository.findByType("slack");
+        List<SystemParameter> systemParameters = systemParametersRepository.findAll();
 
         Map<String, Map<String, String>> groupedByNameValue = systemParameters.stream()
                 .collect(Collectors.groupingBy(SystemParameter::getType,
                         Collectors.toMap(
-                                sp -> Integer.toString(sp.getName()), SystemParameter::getValue
+                                SystemParameter::getName, SystemParameter::getValue
                         )
                 ));
 

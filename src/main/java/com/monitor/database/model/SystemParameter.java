@@ -19,7 +19,7 @@ public class SystemParameter implements Serializable {
     private String type;
 
     @Column(name = "name", nullable = false)
-    private int name;
+    private String name;
 
     @Column(name = "value")
     private String value;

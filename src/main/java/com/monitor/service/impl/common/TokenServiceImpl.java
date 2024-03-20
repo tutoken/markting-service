@@ -7,6 +7,7 @@ import com.monitor.constants.Monitor;
 import com.monitor.constants.Slack;
 import com.monitor.constants.Web3Provider;
 import com.monitor.service.ServiceContext;
+import com.monitor.service.interfaces.SlackService;
 import com.monitor.service.interfaces.TokenService;
 import com.monitor.service.interfaces.chain.BlockchainService;
 import com.monitor.service.parameter.QueryParam;
@@ -57,12 +58,15 @@ public class TokenServiceImpl implements TokenService {
     @Autowired
     private RedisUtil redisUtil;
 
+    @Autowired
+    private SlackService slackService;
+
     @Override
     public String currentPrice(String symbol, String convert) {
-        try {
-            String url = COIN_MARKET_CURRENCY + "?symbol=" + symbol + "&convert=" + convert;
-            Map<String, String> properties = Map.of("Accepts", "application/json", "X-CMC_PRO_API_KEY", "ec4fa893-3f2d-4a09-8ede-7b81253a72cf");
+        String url = COIN_MARKET_CURRENCY + "?symbol=" + symbol + "&convert=" + convert;
+        Map<String, String> properties = Map.of("Accepts", "application/json", "X-CMC_PRO_API_KEY", "ec4fa893-3f2d-4a09-8ede-7b81253a72cf");
 
+        try {
             String response = HttpUtil.get(url, properties, 3);
 
             if (response == null) {
@@ -71,11 +75,15 @@ public class TokenServiceImpl implements TokenService {
             JSONObject data = JSON.parseObject(response);
             Object tusdInfo = data.getJSONObject("data").getJSONArray(symbol).stream().filter(a -> ((JSONObject) a).getInteger("id") == 2563).findFirst().get();
 
-            return ((JSONObject) tusdInfo).getJSONObject("quote").getJSONObject(convert).getString("price");
-        } catch (Exception ex) {
-            log.error(ex.getMessage(), ex);
+            String price = ((JSONObject) tusdInfo).getJSONObject("quote").getJSONObject(convert).getString("price");
+
+            redisUtil.saveStringValue("tusd_price", price, 0, null);
+
+            return price;
+        } catch (Exception exception) {
+            slackService.sendDirectMessage("test", String.format("Get price failed %s", exception));
         }
-        return "0";
+        return redisUtil.getStringValueOrDefault("tusd_price", "1");
     }
 
     @Override

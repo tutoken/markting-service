@@ -1,5 +1,6 @@
 package com.monitor.service.parameter;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,11 +9,12 @@ import org.springframework.util.ObjectUtils;
 
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 
-@Builder
 @Data
-@AllArgsConstructor
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class SubmitFormParam {
     private String website;
     private String contact;
@@ -39,85 +41,67 @@ public class SubmitFormParam {
         return this.getFirstName() + " " + this.getLastName();
     }
 
-    // TODO refactor validation
+    // Extracted method for validating string length
+    private void validateStringLength(String field, String fieldName, int maxLength) {
+        if (field != null && field.length() > maxLength) {
+            throw new IllegalArgumentException(fieldName + " is too long");
+        }
+    }
+
+    // Simplified validation using Optional and extracted common validations
     public void validate() {
-        // Website
+        validateStringLength(website, "Website", 200);
+        validateStringLength(contact, "Contact", 200);
+        validateStringLength(summary, "Summary", 200);
+        validateStringLength(firstName, "FirstName", 200);
+        validateStringLength(lastName, "LastName", 200);
+        validateStringLength(email, "Email", 200);
+        validateStringLength(phone, "Phone Number", 200);
+        validateStringLength(linkedin, "LinkedIn Profile", 200);
+        validateStringLength(role, "Role", 200);
 
         if (!ObjectUtils.isEmpty(website)) {
-            website = website.toLowerCase(Locale.US);
-            if (!website.matches("[http|https:\\/\\/]*[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&:/~\\+#]*[\\w\\-\\@?^=%&/~\\+#])?")) {
+            website = website.toLowerCase(Locale.US).replaceFirst("^(http|https)://", "");
+            if (!website.matches("[\\w\\-_]+(\\.\\w+)+(\\w+://)?([\\w\\-.,@?^=%&:/~+#]*[\\w\\-@?^=%&/~+#])?")) {
                 throw new IllegalArgumentException("Invalid website format");
             }
-            website = website.replaceAll("^(http|https):\\/\\/", "");
         }
 
         if (!ObjectUtils.isEmpty(email) && !email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
             throw new IllegalArgumentException("Invalid email format");
         }
 
-        // Phone
-        if (!ObjectUtils.isEmpty(phone)&& !phone.matches("^[+| 0-9]+([-()]+[0-9])*$")) {
+        if (!ObjectUtils.isEmpty(phone) && !phone.matches("^[+| 0-9]+([-()]+[0-9])*$")) {
             throw new IllegalArgumentException("Invalid phone number format");
         }
 
-        // LinkedIn
         if (!ObjectUtils.isEmpty(linkedin)) {
-            linkedin = linkedin.toLowerCase(Locale.US);
-            if (!linkedin.matches("[http|https:\\/\\/]*[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&:/~\\+#]*[\\w\\-\\@?^=%&/~\\+#])?")) {
+            linkedin = linkedin.toLowerCase(Locale.US).replaceFirst("^(http|https)://", "");
+            if (!linkedin.matches("[\\w\\-_]+(\\.\\w+)+(\\w+://)?([\\w\\-.,@?^=%&:/~+#]*[\\w\\-@?^=%&/~+#])?")) {
                 throw new IllegalArgumentException("Invalid linkedin profile format");
             }
-            linkedin = linkedin.replaceAll("^(http|https):\\/\\/", "");
         }
-
-        if (summary != null && summary.length() > 200) {
-            throw new IllegalArgumentException("Content too long");
-        }
-        if (website != null && website.length() > 200) {
-            throw new IllegalArgumentException("website too long");
-        }
-        if (contact != null && contact.length() > 200) {
-            throw new IllegalArgumentException("contact too long");
-        }
-        if (firstName != null && firstName.length() > 200) {
-            throw new IllegalArgumentException("firstName too long");
-        }
-        if (lastName != null && lastName.length() > 200) {
-            throw new IllegalArgumentException("lastName too long");
-        }
-        if (email != null && email.length() > 200) {
-            throw new IllegalArgumentException("email too long");
-        }
-        if (phone != null && phone.length() > 200) {
-            throw new IllegalArgumentException("phone number too long");
-        }
-        if (linkedin != null && linkedin.length() > 200) {
-            throw new IllegalArgumentException("email address too long");
-        }
-        if (role != null && role.length() > 200) {
-            throw new IllegalArgumentException("Role address too long");
-        }
-
     }
 
     public void validateJob() {
-        Objects.requireNonNull(firstName, "FirstName can not be null.");
-        Objects.requireNonNull(lastName, "LastName can not be null.");
-        Objects.requireNonNull(email, "EMail can not be null.");
-        Objects.requireNonNull(role, "Job description can not be null");
+        Optional.ofNullable(firstName).orElseThrow(() -> new IllegalArgumentException("FirstName can not be null."));
+        Optional.ofNullable(lastName).orElseThrow(() -> new IllegalArgumentException("LastName can not be null."));
+        Optional.ofNullable(email).orElseThrow(() -> new IllegalArgumentException("EMail can not be null."));
+        Optional.ofNullable(role).orElseThrow(() -> new IllegalArgumentException("Job description can not be null"));
 
-        this.validate();
+        validate();
     }
 
     public void validateContact() {
-        Objects.requireNonNull(website, "Website can not be null.");
-        Objects.requireNonNull(contact, "Contact can not be null.");
-        Objects.requireNonNull(summary, "Summary can not be null.");
+        Optional.ofNullable(website).orElseThrow(() -> new IllegalArgumentException("Website can not be null."));
+        Optional.ofNullable(contact).orElseThrow(() -> new IllegalArgumentException("Contact can not be null."));
+        Optional.ofNullable(summary).orElseThrow(() -> new IllegalArgumentException("Summary can not be null."));
 
-        this.validate();
+        validate();
     }
 
     public String[] toArray() {
-        return new String[]{this.website, this.contact, this.linkedin, this.phone, this.email, this.role, this.firstName + " " + this.lastName, this.summary};
+        return new String[]{this.website, this.contact, this.linkedin, this.phone, this.email, this.role, this.getName(), this.summary};
     }
 
     public static class Attachment {
@@ -126,10 +110,7 @@ public class SubmitFormParam {
         String type;
 
         public String getFileName() {
-            if (this.fileName == null) {
-                return "attachment";
-            }
-            return fileName;
+            return Objects.requireNonNullElse(this.fileName, "attachment");
         }
 
         public String getMd5() {
@@ -137,10 +118,7 @@ public class SubmitFormParam {
         }
 
         public String getType() {
-            if (this.type == null) {
-                return "plain/txt";
-            }
-            return type;
+            return Objects.requireNonNullElse(this.type, "plain/txt");
         }
     }
 }
