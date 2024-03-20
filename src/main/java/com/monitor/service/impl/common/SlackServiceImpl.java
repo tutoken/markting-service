@@ -1,6 +1,8 @@
 package com.monitor.service.impl.common;
 
 import com.monitor.constants.Slack;
+import com.monitor.database.model.SystemParameter;
+import com.monitor.database.repository.SystemParametersRepository;
 import com.monitor.service.interfaces.SlackService;
 import com.monitor.service.parameter.Message;
 import com.slack.api.model.block.LayoutBlock;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,6 +28,8 @@ import static com.slack.api.model.block.composition.BlockCompositions.markdownTe
 @Service("slackService")
 public class SlackServiceImpl implements SlackService {
 
+    @Autowired
+    private SystemParametersRepository systemParametersRepository;
     private final ConcurrentHashMap<String, Deque<String>> queue = new ConcurrentHashMap<>();
 
 
@@ -116,6 +121,29 @@ public class SlackServiceImpl implements SlackService {
                 }
             }
         });
+    }
+
+    @Override
+    @PostConstruct
+    public void init() {
+        List<SystemParameter> systemParameters = systemParametersRepository.findAll();
+
+        Map<String, Map<String, String>> groupedByNameValue = systemParameters.stream()
+                .collect(Collectors.groupingBy(SystemParameter::getType,
+                        Collectors.toMap(SystemParameter::getName, SystemParameter::getValue)));
+
+        slack.setWebhook(groupedByNameValue.get("slack_webhook"));
+        slack.setNotice(groupedByNameValue.get("slack_member"));
+    }
+
+    @Override
+    public Map<String, String> list() {
+        Map<String, String> slackMap = new HashMap<>();
+
+        slackMap.putAll(slack.getWebhook());
+        slackMap.putAll(slack.getNotice());
+
+        return slackMap;
     }
 
     private Payload createPayload(String message) {

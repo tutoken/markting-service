@@ -3,7 +3,6 @@ package com.monitor.schedule;
 import com.monitor.constants.Slack;
 import com.monitor.database.model.SchedulerJob;
 import com.monitor.database.model.SchedulerJobDetail;
-import com.monitor.database.model.SystemParameter;
 import com.monitor.database.repository.SchedulerJobDetailRepository;
 import com.monitor.database.repository.SchedulerJobRepository;
 import com.monitor.database.repository.SystemParametersRepository;
@@ -23,7 +22,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -58,31 +56,17 @@ public class ScheduleTaskController {
 
     @PostConstruct
     public void init() {
-        initSlack();
         initSchedulerJobs();
     }
 
-    public void initSlack() {
-        List<SystemParameter> systemParameters = systemParametersRepository.findAll();
 
-        Map<String, Map<String, String>> groupedByNameValue = systemParameters.stream()
-                .collect(Collectors.groupingBy(SystemParameter::getType,
-                        Collectors.toMap(
-                                SystemParameter::getName, SystemParameter::getValue
-                        )
-                ));
-
-        slack.setWebhook(groupedByNameValue.get("slack_webhook"));
-        slack.setNotice(groupedByNameValue.get("slack_member"));
-    }
-
-    public SchedulerResponse initSchedulerJobs() {
+    public void initSchedulerJobs() {
         this.getScheduler();
 
         List<SchedulerJob> schedulerJobs = schedulerJobRepository.findAll();
 
         if (CollectionUtils.isEmpty(schedulerJobs)) {
-            return null;
+            return;
         }
 
         try {
@@ -92,8 +76,7 @@ public class ScheduleTaskController {
             }
         } catch (SchedulerException e) {
             log.error("Can not delete scheduler", e);
-
-            return getSchedulerResult();
+            return;
         }
 
         schedulerJobs.forEach(schedulerJob -> {
@@ -121,7 +104,6 @@ public class ScheduleTaskController {
         } catch (SchedulerException e) {
             log.error("Failed to start scheduler.", e);
         }
-        return getSchedulerResult();
     }
 
     private Class<? extends ScheduleTaskExecutor> getClass(String jobName) throws ClassNotFoundException {

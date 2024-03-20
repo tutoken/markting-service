@@ -105,12 +105,26 @@ public class MonitorController {
     @ApiOperation(value = "config scheduler jobs", httpMethod = "GET", notes = "Query the total supply at a given time")
     @RequestMapping("/scheduler/init")
     public SchedulerResponse initSchedulerJobs() {
-        return scheduleTaskController.initSchedulerJobs();
+        scheduleTaskController.initSchedulerJobs();
+        return scheduleTaskController.getSchedulerResult();
+    }
+
+    @ApiOperation(value = "config scheduler jobs", httpMethod = "GET", notes = "Query the total supply at a given time")
+    @RequestMapping("/slack/init")
+    public Map<String, String> initSlack() {
+        slackService.init();
+        return slackService.list();
     }
 
     @ApiOperation(value = "list scheduler jobs", httpMethod = "GET", notes = "Query the total supply at a given time")
     @RequestMapping("/scheduler/list")
     public SchedulerResponse listSchedulerJobs() {
         return scheduleTaskController.getSchedulerResult();
+    }
+
+    @ApiOperation(value = "list slack detail", httpMethod = "GET", notes = "Query the total supply at a given time")
+    @RequestMapping("/slack/list")
+    public Map<String, String> listSlack() {
+        return slackService.list();
     }
 }
