@@ -8,13 +8,13 @@ import com.monitor.constants.Slack;
 import com.monitor.constants.Token.TUSD;
 import com.monitor.constants.Web3Provider;
 import com.monitor.database.model.MarketSiteDisplays;
-import com.monitor.database.model.MarketSiteDisplays.Type;
 import com.monitor.database.repository.EcosystemRepository;
 import com.monitor.database.repository.MarketSiteDisplaysRepository;
 import com.monitor.service.ServiceContext;
 import com.monitor.service.interfaces.MarketSiteService;
 import com.monitor.service.interfaces.SlackService;
 import com.monitor.service.interfaces.Web3Service;
+import com.monitor.service.parameter.Announcement;
 import com.monitor.utils.HttpUtil;
 import com.monitor.utils.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +34,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static com.monitor.constants.ThirdPartyService.*;
+import static com.monitor.database.model.MarketSiteDisplays.Type.announcement;
 
 /**
  * All externally provided interfaces
@@ -241,13 +242,13 @@ public class MarketSiteServiceImpl implements MarketSiteService {
     }
 
     @Override
-    public Map<String, String> getMarketSiteDisplays(Type type) {
-        MarketSiteDisplays marketSiteDisplays = marketSiteDisplaysRepository.findTopByTypeOrderByVersionDesc(type)
+    public Announcement getAnnouncement() {
+        MarketSiteDisplays marketSiteDisplays = marketSiteDisplaysRepository.findTopByTypeOrderByVersionDesc(announcement)
                 .orElseGet(() -> {
-                    log.warn("No MarketSiteDisplays found for type: {}", type);
+                    log.warn("No MarketSiteDisplays found for announcement.");
                     return new MarketSiteDisplays();
                 });
 
-        return marketSiteDisplays.getDisplays();
+        return new Announcement(marketSiteDisplays.getContent(), marketSiteDisplays.isEnable());
     }
 }

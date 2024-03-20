@@ -1,6 +1,7 @@
 package com.monitor.service.interfaces;
 
 import com.monitor.database.model.MarketSiteDisplays.Type;
+import com.monitor.service.parameter.Announcement;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
@@ -47,7 +48,7 @@ public interface MarketSiteService {
     /**
      * Return the banner and the display switch indicating whether to show it
      */
-    Map<String, String> getMarketSiteDisplays(Type type);
+    Announcement getAnnouncement();
 }
 
 

@@ -4,6 +4,7 @@ import com.monitor.schedule.ScheduleTaskController;
 import com.monitor.service.interfaces.EMailService;
 import com.monitor.service.interfaces.MarketSiteService;
 import com.monitor.service.interfaces.Web3Service;
+import com.monitor.service.parameter.Announcement;
 import com.monitor.service.parameter.CommonResponse;
 import com.monitor.service.parameter.SubmitFormParam;
 import com.monitor.service.parameter.TotalSupply;
@@ -108,8 +109,8 @@ public class MarketSiteController {
 
     @ApiOperation(value = "announcement", httpMethod = "GET", notes = "Get announcement")
     @RequestMapping("/announcement")
-    Map<String, String> banner() {
-        return marketSiteService.getMarketSiteDisplays(announcement);
+    Announcement announcement() {
+        return marketSiteService.getAnnouncement();
     }
 
 }
