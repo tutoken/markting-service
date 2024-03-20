@@ -48,11 +48,7 @@ public class SlackServiceImpl implements SlackService {
 
     @Override
     public void sendCodeBlockMessage(String channel, String message) {
-        try {
-            this.send(channel, String.format("```%s```", message));
-        } catch (Exception ex) {
-            log.error(String.format("Send message to  %s failed, message is %s", channel, message), ex);
-        }
+        this.sendDirectMessage(channel, String.format("```%s```", message));
     }
 
     @Override
@@ -80,7 +76,10 @@ public class SlackServiceImpl implements SlackService {
 
     @Override
     public void sendMessage(String channel, Message message) {
-        Assert.isTrue(!CollectionUtils.isEmpty(message), "Message should not be empty");
+        if (CollectionUtils.isEmpty(message)) {
+            log.error("Message should not be empty");
+            return;
+        }
 
         message.forEach(value -> {
             try {
@@ -132,8 +131,17 @@ public class SlackServiceImpl implements SlackService {
                 .collect(Collectors.groupingBy(SystemParameter::getType,
                         Collectors.toMap(SystemParameter::getName, SystemParameter::getValue)));
 
-        slack.setWebhook(groupedByNameValue.get("slack_webhook"));
-        slack.setNotice(groupedByNameValue.get("slack_member"));
+        if (CollectionUtils.isEmpty(slack.getWebhook())) {
+            slack.setWebhook(groupedByNameValue.getOrDefault("slack_webhook", Collections.emptyMap()));
+        } else {
+            slack.getWebhook().putAll(groupedByNameValue.getOrDefault("slack_webhook", Collections.emptyMap()));
+        }
+
+        if (CollectionUtils.isEmpty(slack.getNotice())) {
+            slack.setNotice(groupedByNameValue.getOrDefault("slack_member", Collections.emptyMap()));
+        } else {
+            slack.getNotice().putAll(groupedByNameValue.getOrDefault("slack_member", Collections.emptyMap()));
+        }
     }
 
     @Override

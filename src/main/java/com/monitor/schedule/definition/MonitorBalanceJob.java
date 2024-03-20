@@ -45,7 +45,7 @@ public class MonitorBalanceJob extends ScheduleJobDefinition {
 
         if (!waringTable.isEmpty()) {
             message.addTable(title, waringTable);
-            slackService.sendMessage(getDefaultChannel(), message);
+            this.sendMessage(message);
             this.noticeRecipients();
         }
     }

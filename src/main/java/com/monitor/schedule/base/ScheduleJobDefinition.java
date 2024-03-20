@@ -59,7 +59,7 @@ public abstract class ScheduleJobDefinition {
     }
 
     public void sendMessage(Message message) {
-        if (schedulerJobDetail.isSendAlert()) {
+        if (schedulerJobDetail.isSendAlert() && message != null) {
             slackService.sendMessage(getDefaultChannel(), message);
         }
     }

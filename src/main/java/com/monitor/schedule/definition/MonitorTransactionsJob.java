@@ -65,8 +65,8 @@ public class MonitorTransactionsJob extends ScheduleJobDefinition {
             message.addDirectMessage(alarm);
             message.addTable(title, transactionInfo);
 //            message.addWaring("Hosea", "Lily");
-            slackService.sendMessage(getDefaultChannel(), message);
-            noticeRecipients();
+            this.sendMessage(message);
+            this.noticeRecipients();
         }
     }
 

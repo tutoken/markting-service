@@ -1,6 +1,7 @@
 package com.monitor.schedule.definition;
 
 import com.monitor.schedule.base.ScheduleJobDefinition;
+import com.monitor.service.parameter.Message;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -21,9 +22,10 @@ public class MonitorRipcordsJob extends ScheduleJobDefinition {
     public void run() {
         String status = tokenService.ripcords();
         if (status != null && !"".equals(status)) {
-            slackService.sendCodeBlockMessage(getDefaultChannel(), String.format("Current ripcords status is %s", status));
+            Message message = new Message();
+            message.addCodeBlockMessage(String.format("Current ripcords status is %s", status));
+            this.sendMessage(message);
             if (betweenPeriod()) {
-//                slackService.sendWarning("tusd", "Chichan", "Lily");
                 noticeRecipients();
             }
         }

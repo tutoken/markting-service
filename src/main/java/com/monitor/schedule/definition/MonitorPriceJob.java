@@ -1,6 +1,7 @@
 package com.monitor.schedule.definition;
 
 import com.monitor.schedule.base.ScheduleJobDefinition;
+import com.monitor.service.parameter.Message;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,10 @@ public class MonitorPriceJob extends ScheduleJobDefinition {
         if (price != null && !"".equals(price)) {
             BigDecimal currentPrice = new BigDecimal(price);
             if (currentPrice.compareTo(TUSD_PRICE) < 0) {
-                slackService.sendCodeBlockMessage(getDefaultChannel(), String.format("Current price is $%s", price));
+                Message message = new Message();
+                message.addCodeBlockMessage(String.format("Current price is $%s", price));
+
+                this.sendMessage(message);
                 this.noticeRecipients();
             }
         }
