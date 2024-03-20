@@ -36,12 +36,6 @@ public class ScheduleTaskController {
     @Autowired
     private ScheduleTaskExecutor scheduleTaskExecutor;
 
-    @Autowired
-    private Slack slack;
-
-    @Autowired
-    private SystemParametersRepository systemParametersRepository;
-
     private Scheduler scheduler;
 
     public void execute(List<String> definitions) {
