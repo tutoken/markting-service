@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.web3</groupId>
-    <artifactId>blockchain-monitor</artifactId>
-    <version>MS-1.0.8-SNAPSHOT</version>
-    <name>blockchain-monitor</name>
-    <description>blockchain-monitor</description>
+    <artifactId>market-site</artifactId>
+    <version>1.0.8-SNAPSHOT</version>
+    <name>market-site</name>
+    <description>market-site-backend</description>
 
     <properties>
         <java.version>11</java.version>
